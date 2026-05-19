@@ -3,34 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>계산기</title>
+    <title>통합 검색</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background-color:#f4f4f9;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}.box{background:#fff;padding:20px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.08);width:290px}.hidden{display:none!important}#calc-display{width:100%;height:55px;background:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;text-align:right;padding:10px 14px;font-size:22px;box-sizing:border-box;margin-bottom:15px;color:#212529}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.grid button{padding:16px;font-size:17px;border:1px solid #f1f3f5;background:#fff;border-radius:8px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.02);transition:background .1s}.grid button:active{background:#f1f3f5}.grid .op{background:#f8f9fa;font-weight:600;color:#007aff}.title{font-size:13px;font-weight:600;margin-bottom:6px;color:#8e8e93;text-transform:uppercase;letter-spacing:-.2px}input[type=text]{width:100%;padding:12px;border:1px solid #e5e5ea;border-radius:8px;box-sizing:border-box;margin-bottom:12px;font-size:14px;background:#fafafa;transition:border-color .2s}input[type=text]:focus{border-color:#007aff;outline:none;background:#fff}.btn{width:100%;padding:12px;background:#007aff;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;transition:background .2s}.btn:disabled{background:#d1d1d6}#chat-screen{position:relative}#chat-area{height:260px;border:1px solid #e5e5ea;border-radius:12px;overflow-y:auto;padding:12px;background:#fff;margin-bottom:12px;font-size:13px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box}.msg-wrapper{display:flex;flex-direction:column;position:relative;width:100%}.msg{display:flex;flex-direction:column;max-width:100%;position:relative}.msg.my-msg{align-items:flex-end}.msg.other-msg{align-items:flex-start}.msg.system-msg{align-items:center}.sender-name{font-size:11px;color:#8e8e93;font-weight:500;margin-bottom:3px;margin-left:6px}.bubble-container{display:flex;align-items:center;gap:6px;width:100%;position:relative}.my-msg .bubble-container{justify-content:flex-end}.bubble{padding:8px 14px;border-radius:16px;max-width:75%;word-break:break-all;line-height:1.4;font-size:13.5px;box-shadow:0 1px 2px rgba(0,0,0,.04);position:relative}.my-msg .bubble{background:#007aff;color:#fff;border-bottom-right-radius:4px}.other-msg .bubble{background:#e5e5ea;color:#000;border-top-left-radius:4px}.system-msg .bubble{background:none;color:#aeaeb2;font-size:11px;padding:0;box-shadow:none;margin:4px 0}.mention{background:rgba(0,122,255,.12);color:#007aff;padding:1px 5px;border-radius:4px;font-weight:600}.my-msg .mention{background:rgba(255,255,255,.25);color:#fff}.msg.mentioned .bubble{background:#fff2cc!important;border:1px solid #ffe599;color:#b45f06!important}.msg.mentioned .mention{background:#ffe599;color:#b45f06}.msg-menu{display:none;gap:4px;background:rgba(255,255,255,0.95);border:1px solid #e5e5ea;border-radius:12px;padding:2px 6px;box-shadow:0 2px 8px rgba(0,0,0,0.08);position:absolute;top:-20px;z-index:5}.msg-wrapper:hover .msg-menu{display:flex}.msg-menu button{background:none;border:none;cursor:pointer;font-size:11px;padding:2px 4px;color:#666;border-radius:4px}.msg-menu button:hover{background:#f1f2f6;color:#007aff}.msg-menu button.del-btn:hover{color:#ff3b30}.reaction-container{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;width:100%}.my-msg .reaction-container{justify-content:flex-end}.other-msg .reaction-container{justify-content:flex-start}.reaction-badge{background:#f1f2f6;border:1px solid #e5e5ea;border-radius:10px;padding:1px 6px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:2px;user-select:none}.reaction-badge.active{background:rgba(0,122,255,0.1);border-color:#007aff;color:#007aff}.react-add-btn{background:none;border:none;color:#8e8e93;cursor:pointer;font-size:12px;padding:0 4px;display:flex;align-items:center}.react-add-btn:hover{color:#007aff}.react-picker{display:none;position:absolute;background:white;border:1px solid #e5e5ea;box-shadow:0 4px 12px rgba(0,0,0,0.1);border-radius:20px;padding:4px 8px;gap:6px;z-index:20;bottom:24px}.react-picker.show{display:flex}.react-opt{cursor:pointer;font-size:16px;transition:transform 0.1s}.react-opt:hover{transform:scale(1.2)}.chat-input-container{display:flex;align-items:center;gap:4px;background:#f1f2f6;padding:4px 6px;border-radius:20px;box-sizing:border-box;position:relative}.chat-input-container input[type=text]{margin-bottom:0;flex-grow:1;border:none;background:none;padding:8px 10px;font-size:14px}.chat-input-container input[type=text]:focus{background:none}.emoji-toggle-btn,.file-upload-btn{background:none;border:none;cursor:pointer;padding:2px;flex-shrink:0;display:flex;justify-content:center;align-items:center;width:24px;height:24px}.emoji-toggle-btn svg,.file-upload-btn svg{width:20px;height:20px;fill:none;stroke:#8e8e93;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke .1s}.emoji-toggle-btn:hover svg,.file-upload-btn:hover svg{stroke:#007aff}.send-btn{width:28px;height:28px;background-color:#007aff;border:none;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;flex-shrink:0;transition:transform .1s}.send-btn:active{transform:scale(.95)}.send-btn svg{width:14px;height:14px;fill:#fff}.emoji-panel{position:absolute;bottom:46px;left:0;width:100%;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border:1px solid #e5e5ea;border-radius:12px;box-shadow:0 -4px 16px rgba(0,0,0,.06);display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:10px;box-sizing:border-box;z-index:10;max-height:200px;overflow-y:auto}.emoji-item{font-size:20px;text-align:center;cursor:pointer;padding:6px 0;border-radius:8px;transition:background .1s;display:flex;justify-content:center;align-items:center}.emoji-item:hover{background:#e5e5ea}.chat-img{max-width:100%;border-radius:10px;margin-top:2px;display:block;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.1)}#mention-popup{position:absolute;bottom:46px;left:10px;background:white;border:1px solid #e5e5ea;box-shadow:0 -2px 10px rgba(0,0,0,0.1);border-radius:8px;width:180px;max-height:120px;overflow-y:auto;z-index:30;display:none}.mention-item{padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #f1f3f5}.mention-item:last-child{border-bottom:none}.mention-item:hover,.mention-item.active{background:#f1f2f6;color:#007aff;font-weight:600}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background-color:#fafafa;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;user-select:none}.box{background:#fff;padding:24px;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.05);width:310px;box-sizing:border-box}.hidden{display:none!important}
+        /* 검색창 위장 스타일 */
+        .search-container{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0}.search-logo{font-size:24px;font-weight:800;letter-spacing:-1px;margin-bottom:20px;color:#007aff}.search-wrapper{position:relative;width:100%;display:flex;align-items:center;background:#f1f2f6;border-radius:24px;padding:4px 14px;box-sizing:border-box;border:1px solid transparent;transition:all .2s}.search-wrapper:focus-within{background:#fff;border-color:#007aff;box-shadow:0 4px 12px rgba(0,122,255,0.1)}#search-bar{width:100%;border:none;background:none;padding:10px 0;font-size:14.5px;outline:none;color:#212529}.search-icon{width:18px;height:18px;stroke:#8e8e93;fill:none;stroke-width:2;margin-right:8px;cursor:pointer}
+        /* 공통 UI */
+        .title{font-size:13px;font-weight:600;margin-bottom:6px;color:#8e8e93;text-transform:uppercase;letter-spacing:-.2px}input[type=text]{width:100%;padding:12px;border:1px solid #e5e5ea;border-radius:8px;box-sizing:border-box;margin-bottom:12px;font-size:14px;background:#fafafa;transition:border-color .2s}input[type=text]:focus{border-color:#007aff;outline:none;background:#fff}.btn{width:100%;padding:12px;background:#007aff;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;transition:background .2s}.btn:disabled{background:#d1d1d6}
+        /* 채팅방 스타일 */
+        #chat-area{height:280px;border:1px solid #e5e5ea;border-radius:12px;overflow-y:auto;padding:12px;background:#fff;margin-bottom:12px;font-size:13px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box;position:relative}.msg-wrapper{display:flex;flex-direction:column;position:relative;width:100%}.msg{display:flex;flex-direction:column;max-width:100%;position:relative}.msg.my-msg{align-items:flex-end}.msg.other-msg{align-items:flex-start}.msg.system-msg{align-items:center}.sender-name{font-size:11px;color:#8e8e93;font-weight:500;margin-bottom:3px;margin-left:6px}.bubble-container{display:flex;align-items:center;gap:6px;width:100%;position:relative}.my-msg .bubble-container{justify-content:flex-end}.bubble{padding:9px 14px;border-radius:16px;max-width:75%;word-break:break-all;line-height:1.4;font-size:13.5px;box-shadow:0 1px 2px rgba(0,0,0,.03);position:relative;cursor:pointer;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}.my-msg .bubble{background:#007aff;color:#fff;border-bottom-right-radius:4px}.other-msg .bubble{background:#e5e5ea;color:#000;border-top-left-radius:4px}.system-msg .bubble{background:none;color:#aeaeb2;font-size:11px;padding:0;box-shadow:none;margin:4px 0}.mention{background:rgba(0,122,255,.12);color:#007aff;padding:1px 5px;border-radius:4px;font-weight:600}.my-msg .mention{background:rgba(255,255,255,.25);color:#fff}.msg.mentioned .bubble{background:#fff2cc!important;border:1px solid #ffe599;color:#b45f06!important}.msg-menu{display:none;gap:6px;background:rgba(255,255,255,0.95);border:1px solid #e5e5ea;border-radius:20px;padding:4px 8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);position:absolute;top:-24px;z-index:5}.msg-wrapper:hover .msg-menu{display:flex}.msg-menu button{background:none;border:none;cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center;width:20px;height:20px}.msg-menu button svg{width:15px;height:15px;fill:none;stroke:#8e8e93;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.msg-menu button:hover svg{stroke:#007aff}.msg-menu button.del-btn:hover svg{stroke:#ff3b30}
+        /* 공감 배지 및 팝업 픽커 구조 수정 */
+        .reaction-container{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;width:100%}.my-msg .reaction-container{justify-content:flex-end}.other-msg .reaction-container{justify-content:flex-start}.reaction-badge{background:#f1f2f6;border:1px solid #e5e5ea;border-radius:10px;padding:1px 6px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:2px}.reaction-badge.active{background:rgba(0,122,255,0.1);border-color:#007aff;color:#007aff}.react-picker{display:none;position:absolute;background:white;border:1px solid #e5e5ea;box-shadow:0 4px 16px rgba(0,0,0,0.12);border-radius:24px;padding:6px 10px;gap:8px;z-index:100;top:-38px}.my-msg .react-picker{right:10px}.other-msg .react-picker{left:10px}.react-picker.show{display:flex}.react-opt{cursor:pointer;font-size:16px;transition:transform 0.1s}.react-opt:hover{transform:scale(1.25)}
+        /* 하단 입력창 */
+        .chat-input-container{display:flex;align-items:center;gap:4px;background:#f1f2f6;padding:4px 6px;border-radius:20px;box-sizing:border-box;position:relative}.chat-input-container input[type=text]{margin-bottom:0;flex-grow:1;border:none;background:none;padding:8px 10px;font-size:14px}.chat-input-container input[type=text]:focus{background:none}.file-upload-btn{background:none;border:none;cursor:pointer;padding:2px;flex-shrink:0;display:flex;justify-content:center;align-items:center;width:24px;height:24px}.file-upload-btn svg{width:20px;height:20px;fill:none;stroke:#8e8e93;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.file-upload-btn:hover svg{stroke:#007aff}.send-btn{width:28px;height:28px;background-color:#007aff;border:none;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;flex-shrink:0}.send-btn svg{width:14px;height:14px;fill:#fff}.chat-img{max-width:100%;border-radius:10px;margin-top:2px;display:block;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.1)}#mention-popup{position:absolute;bottom:46px;left:10px;background:white;border:1px solid #e5e5ea;box-shadow:0 -2px 10px rgba(0,0,0,0.1);border-radius:8px;width:180px;max-height:120px;overflow-y:auto;z-index:30;display:none}.mention-item{padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #f1f3f5}.mention-item:hover,.mention-item.active{background:#f1f2f6;color:#007aff;font-weight:600}
+        /* 복싱 모드 선택 패널 */
+        .boxing-panel{background:#1c1c1e;color:#fff;border-radius:12px;padding:14px;margin:8px 0;box-sizing:border-box;border:1px solid #2c2c2e}.boxing-title{font-size:13px;font-weight:700;color:#ff3b30;margin-bottom:10px;text-align:center;letter-spacing:1px}.boxing-modes{display:flex;gap:8px}.boxing-btn{flex:1;padding:10px;font-size:12px;background:#2c2c2e;color:#fff;border:1px solid #3a3a3c;border-radius:8px;cursor:pointer;font-weight:600;transition:all .1s}.boxing-btn:hover{background:#ff3b30;border-color:#ff3b30}
     </style>
 </head>
 <body>
 
 <div class="box">
-    <div id="calc-screen">
-        <input type="text" id="calc-display" value="0" readonly>
-        <div class="grid">
-            <button class="op" onclick="window['_0x3f1a']()">C</button>
-            <button class="op" onclick="window['_0x5b2c']('/')">/</button>
-            <button class="op" onclick="window['_0x5b2c']('*')">*</button>
-            <button class="op" onclick="window['_0x5b2c']('-')">-</button>
-            <button onclick="window['_0x5b2c']('7')">7</button>
-            <button onclick="window['_0x5b2c']('8')">8</button>
-            <button onclick="window['_0x5b2c']('9')">9</button>
-            <button class="op" onclick="window['_0x5b2c']('+')">+</button>
-            <button onclick="window['_0x5b2c']('4')">4</button>
-            <button onclick="window['_0x5b2c']('5')">5</button>
-            <button onclick="window['_0x5b2c']('6')">6</button>
-            <button class="op" onclick="window['_0x2d1f']()">?</button>
-            <button onclick="window['_0x5b2c']('1')">1</button>
-            <button onclick="window['_0x5b2c']('2')">2</button>
-            <button onclick="window['_0x5b2c']('3')">3</button>
-            <button onclick="window['_0x5b2c']('0')">0</button>
+    <div id="calc-screen" class="search-container">
+        <div class="search-logo">Search</div>
+        <div class="search-wrapper">
+            <svg class="search-icon" viewBox="0 0 24 24" onclick="window['_triggerSearch']()"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="search-bar" placeholder="검색어를 입력하세요..." onkeydown="window['_handleSearchKey'](event)">
         </div>
     </div>
 
@@ -44,15 +42,11 @@
 
     <div id="chat-screen" class="hidden">
         <div id="chat-area"></div>
-        <div id="emoji-panel" class="emoji-panel hidden"></div>
         <div id="mention-popup"></div>
         <div class="chat-input-container">
             <input type="file" id="image-input" accept="image/*" class="hidden" onchange="window['_0x7b2a'](this)">
             <button class="file-upload-btn" onclick="document.getElementById('image-input').click()">
                 <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-            </button>
-            <button class="emoji-toggle-btn" onclick="window['_0x1a5b']()">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><circle cx="8.5" cy="9.5" r="1" fill="currentColor" /><circle cx="15.5" cy="9.5" r="1" fill="currentColor" /><path d="M8 14.5c1.5 2 4.5 2 6 0" /></svg>
             </button>
             <input type="text" id="chat-input" placeholder="메시지 입력..." onkeydown="window['_0x9a2c'](event)" oninput="window['_0x8b3d'](this)">
             <button class="send-btn" onclick="window['_0x6a5b']()">
@@ -63,115 +57,57 @@
 </div>
 
 <script>
-    const _0x4a12 = ['calc-display', 'value', 'endsWith', '1112', 'calc-screen', 'add', 'hidden', 'name-screen', 'remove', 'nickname', 'focus', 'Error', 'emoji-panel', 'toggle', 'chat-input', 'roomname', 'trim', 'join-btn', 'disabled', 'school_chat/', 'wss://broker.emqx.io:8084/mqtt', 'connect', 'subscribe', 'chat-screen', 'message', 'toString', 'parse', 'galli', 'amheng', 'CLEAR_ALL', 'chat-area', 'innerHTML', 'sender', '시스템', 'publish', 'createElement', 'div', 'className', 'msg', 'my-msg', 'other-msg', '@all', 'mention', 'mentioned', 'appendChild', 'scrollTop', 'scrollHeight', 'CHECK_DUP', 'DUP_RESPONSE', 'reject', 'Notification', 'permission', 'requestPermission', 'granted', '새로운 멘션이 있습니다!', 'image', 'clientHeight'];
-    const _0x51b9 = function(_0x0) { return _0x4a12[_0x0]; };
-
-    let _0x12 = null, _0x34 = "0", _0x56 = "", _0x78 = "", _0x90 = "";
+    let _0x12 = null, _0x78 = "", _0x90 = "";
     let _0xef = new Set(['all']); 
     let _0xda = false;
     let _editingMsgId = null; 
     let _activeMentionIdx = 0; 
-    let _isNotificationEnabled = true; // 멘션 허용 여부 변수 기본 켬
-    const _0xee = ['😀','😁','😆','😅','🤣','😂','🙃','😉','🥰','😍','🤩','😘','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🥵','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤢','🤮','🤧','🥶','🥴','😵','🤯','🤠','🥳','😎','🤓','🧐','😕','😟','🙁','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😱','😭','🤡','💩','👻','💀','☠️','👽','👿','😈','👹','👺','💥','🤬','😡','😠','👍','👎','👊','✊','🤛','🤜','🤞','✌️','🤟','🤘','👌','🤌','🤏','👈','👉','👆','🖕','👇','☝️','✋','🖐️','🖖','👋','🤙','👏','🙌','🙏','🤝'];
+    let _isNotificationEnabled = true; 
     const _reactOpts = ['👍', '❤️', '😂', '😮', '😢'];
-    const _cmdOpts = ['/도움말', '/멘션설정', '/멘션해제', '/clear'];
+    const _cmdOpts = ['/도움말', '/멘션설정', '/멘션해제', '/clear', '/복싱'];
+
+    // 위장 검색 메커니즘
+    window['_handleSearchKey'] = function(e) {
+        if (e.key === 'Enter') {
+            window['_triggerSearch']();
+        }
+    };
+    window['_triggerSearch'] = function() {
+        const query = document.getElementById('search-bar').value.trim();
+        if (!query) return;
+        if (query === "1112") {
+            document.getElementById('calc-screen').classList.add('hidden');
+            document.getElementById('name-screen').classList.remove('hidden');
+            document.getElementById('nickname').focus();
+            if ('Notification' in window && window.Notification.permission !== 'granted') {
+                window.Notification.requestPermission();
+            }
+            document.getElementById('search-bar').value = "";
+        } else {
+            window.location.href = "https://www.google.com/search?q=" + encodeURIComponent(query);
+        }
+    };
 
     function _0x3c(_0xmsg, _0xsnd) {
         try {
-            if (!_isNotificationEnabled) return; // 사용자가 멘션해제 했다면 알림 건너뜀
-            if (_0x51b9(50) in window) {
-                if (window[_0x51b9(50)][_0x51b9(51)] === _0x51b9(53)) {
-                    new window[_0x51b9(50)](_0x51b9(54), {
-                        body: _0xmsg.startsWith('data:image') ? `[${_0xsnd}] 사진을 보냈습니다.` : `[${_0xsnd}]: ${_0xmsg}`,
-                        icon: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23007aff"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.8 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>'
-                    });
-                }
+            if (!_isNotificationEnabled) return;
+            if ('Notification' in window && window.Notification.permission === 'granted') {
+                new window.Notification('새로운 멘션이 있습니다!', {
+                    body: _0xmsg.startsWith('data:image') ? `[${_0xsnd}] 사진을 보냈습니다.` : `[${_0xsnd}]: ${_0xmsg}`
+                });
             }
         } catch (e) {}
     }
 
-    function _0x1c() {
-        if (_0x51b9(50) in window && window[_0x51b9(50)][_0x51b9(51)] !== _0x51b9(53)) {
-            window[_0x51b9(50)][_0x51b9(52)]();
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const _0xfa = document.getElementById(_0x51b9(12));
-        if (_0xfa) {
-            _0xee.forEach(_0xe => {
-                const _0xd = document.createElement(_0x51b9(36));
-                _0xd.className = _0x51b9(37);
-                _0xd.innerText = _0xe;
-                _0xd.addEventListener('click', () => window['_0x2b3c'](_0xe));
-                _0xfa.appendChild(_0xd);
-            });
-        }
-        document.addEventListener('click', () => {
-            document.querySelectorAll('.react-picker').forEach(p => p.classList.remove('show'));
-        });
-    });
-
-    window['_0x5b2c'] = function(_0xa) {
-        if (_0x34 === "0") _0x34 = "";
-        _0x34 += _0xa;
-        document.getElementById(_0x51b9(0))[_0x51b9(1)] = _0x34;
-        if (!['+', '-', '*', '/'].includes(_0xa)) {
-            _0x56 += _0xa;
-        } else {
-            _0x56 = "";
-        }
-        if (_0x56[_0x51b9(2)](_0x51b9(3))) {
-            document.getElementById(_0x51b9(4)).classList[_0x51b9(5)](_0x51b9(6));
-            document.getElementById(_0x51b9(7)).classList[_0x51b9(8)](_0x51b9(6));
-            document.getElementById(_0x51b9(9))[_0x51b9(10)]();
-            _0x1c();
-            _0x56 = "";
-        }
-    };
-
-    window['_0x3f1a'] = function() {
-        _0x34 = "0";
-        _0x56 = "";
-        document.getElementById(_0x51b9(0))[_0x51b9(1)] = _0x34;
-    };
-
-    window['_0x2d1f'] = function() {
-        try {
-            _0x34 = eval(_0x34)[_0x51b9(25)]();
-            document.getElementById(_0x51b9(0))[_0x51b9(1)] = _0x34;
-            _0x56 = _0x34;
-        } catch (_0xe) {
-            document.getElementById(_0x51b9(0))[_0x51b9(1)] = _0x51b9(11);
-            _0x34 = "";
-            _0x56 = "";
-        }
-    };
-
-    window['_0x1a5b'] = function() {
-        document.getElementById(_0x51b9(12)).classList[_0x51b9(13)](_0x51b9(6));
-    };
-
-    window['_0x2b3c'] = function(_0xc) {
-        const _0xb = document.getElementById(_0x51b9(14));
-        _0xb[_0x51b9(1)] += _0xc;
-        _0xb[_0x51b9(10)]();
-        document.getElementById(_0x51b9(12)).classList[_0x51b9(5)](_0x51b9(6));
-    };
-
     window['_0x7b2a'] = function(_0xinput) {
         if (_0xinput.files && _0xinput.files[0]) {
             const _0xfile = _0xinput.files[0];
-            if (_0xfile.size > 2 * 1024 * 1024) {
-                alert("이미지 용량은 2MB 이내여야 합니다.");
-                _0xinput.value = "";
-                return;
-            }
+            if (_0xfile.size > 2 * 1024 * 1024) { alert("이미지는 2MB 이내여야 합니다."); return; }
             const _0xreader = new FileReader();
             _0xreader.onload = function(_0xe) {
                 if (!_0x12) return;
-                const _0xpayload = { id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5), sender: _0x78, type: _0x51b9(55), data: _0xe.target.result, reactions: {} };
-                _0x12[_0x51b9(34)](_0x90, JSON.stringify(_0xpayload), { qos: 0, retain: false });
+                const _0xpayload = { id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5), sender: _0x78, type: 'image', data: _0xe.target.result, reactions: {} };
+                _0x12.publish(_0x90, JSON.stringify(_0xpayload));
                 _0xinput.value = "";
             };
             _0xreader.readAsDataURL(_0xfile);
@@ -179,446 +115,254 @@
     };
 
     window['_0x4c2b'] = function() {
-        const _0xf = document.getElementById(_0x51b9(9))[_0x51b9(1)][_0x51b9(16)]();
-        const _0x8 = document.getElementById(_0x51b9(15))[_0x51b9(1)][_0x51b9(16)]();
-        if (!_0xf || !_0x8) return alert('닉네임과 채널명을 정확히 입력해주세요.');
+        const _0xf = document.getElementById('nickname').value.trim();
+        const _0x8 = document.getElementById('roomname').value.trim();
+        if (!_0xf || !_0x8) return alert('정확히 입력해주세요.');
         if (/[신순자]/.test(_0xf)) { alert("사용할 수 없는 이름이 포함되어 있습니다."); return; }
         
-        _0x78 = _0xf;
-        _0x90 = _0x51b9(19) + _0x8;
-        _0xda = false;
+        _0x78 = _0xf; _0x90 = 'school_chat/' + _0x8; _0xda = false;
+        const _0x7 = document.getElementById('join-btn');
+        _0x7.disabled = true; _0x7.innerText = "접속 중...";
         
-        const _0x7 = document.getElementById(_0x51b9(17));
-        _0x7[_0x51b9(18)] = true;
-        _0x7.innerText = "접속 중...";
-        
-        _0x12 = mqtt[_0x51b9(21)](_0x51b9(20));
-        
+        _0x12 = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
         _0x12.on('connect', () => {
-            _0x12[_0x51b9(22)](_0x90, { qos: 0 }, (_0x4) => {
-                if (!_0x4) {
-                    const _0xchk = { action: _0x51b9(47), name: _0x78 };
-                    _0x12[_0x51b9(34)](_0x90, JSON.stringify(_0xchk), { qos: 0, retain: false });
-                    
-                    setTimeout(() => {
-                        if (_0xda) return;
-                        document.getElementById(_0x51b9(7)).classList[_0x51b9(5)](_0x51b9(6));
-                        document.getElementById(_0x51b9(23)).classList[_0x51b9(8)](_0x51b9(6));
-                        document.getElementById(_0x51b9(14))[_0x51b9(10)]();
-                        _0xef.add(_0x78);
-                        _0x2a(_0x78 + "님이 입장하셨습니다.");
-                        setInterval(() => {
-                            if(_0x12) _0x12[_0x51b9(34)](_0x90, JSON.stringify({ action: 'PING', name: _0x78 }), { qos:0, retain:false });
-                        }, 3000);
-                    }, 800);
-                }
+            _0x12.subscribe(_0x90, () => {
+                _0x12.publish(_0x90, JSON.stringify({ action: 'CHECK_DUP', name: _0x78 }));
+                setTimeout(() => {
+                    if (_0xda) return;
+                    document.getElementById('name-screen').classList.add('hidden');
+                    document.getElementById('chat-screen').classList.remove('hidden');
+                    document.getElementById('chat-input').focus();
+                    _0xef.add(_0x78);
+                    _0x2a(_0x78 + "님이 입장하셨습니다.");
+                }, 800);
             });
         });
         
-        _0x12.on(_0x51b9(24), (_0x3, _0x5) => {
-            if (_0x3 !== _0x90) return;
-            const _0x2 = _0x5[_0x51b9(25)]();
-            if (!_0x2) return;
+        _0x12.on('message', (_0x3, _0x5) => {
             try {
-                const _0x1 = JSON[_0x51b9(26)](_0x2);
-                
-                // 비상 프로토콜 감지 수신부
+                const _0x1 = JSON.parse(_0x5.toString());
                 if (_0x1.action === 'PANIC_EMERGENCY') {
-                    document.getElementById(_0x51b9(30))[_0x51b9(31)] = ""; // 기록파괴
-                    _0x3f1a(); // 계산기 상태 초기화
-                    document.getElementById(_0x51b9(23)).classList[_0x51b9(5)](_0x51b9(6)); // 채팅방 감춤
-                    document.getElementById(_0x51b9(4)).classList[_0x51b9(8)](_0x51b9(6)); // 계산기 노출
-                    if(_0x12) { _0x12.end(); _0x12 = null; } // 연결 폭파
-                    const _0x7 = document.getElementById(_0x51b9(17));
-                    _0x7[_0x51b9(18)] = false; _0x7.innerText = "접속하기";
+                    document.getElementById('chat-area').innerHTML = ""; 
+                    document.getElementById('chat-screen').classList.add('hidden'); 
+                    document.getElementById('calc-screen').classList.remove('hidden'); 
+                    if(_0x12) { _0x12.end(); _0x12 = null; } 
+                    _0x7.disabled = false; _0x7.innerText = "접속하기";
                     return;
                 }
-                
-                if (_0x1.action === _0x51b9(47)) {
+                if (_0x1.action === 'CHECK_DUP') {
                     if (_0x78 !== _0x1.name && _0xef.has(_0x1.name)) {
-                        const _0xres = { action: _0x51b9(48), target: _0x1.name, result: _0x51b9(49) };
-                        _0x12[_0x51b9(34)](_0x90, JSON.stringify(_0xres), { qos: 0, retain: false });
+                        _0x12.publish(_0x90, JSON.stringify({ action: 'DUP_RESPONSE', target: _0x1.name, result: 'reject' }));
                     }
-                    if (_0x1.name !== _0x51b9(33)) _0xef.add(_0x1.name);
-                    return;
+                    _0xef.add(_0x1.name); return;
                 }
-                if (_0x1.action === _0x51b9(48)) {
-                    if (_0x78 === _0x1.target && _0x1.result === _0x51b9(49)) {
-                        _0xda = true;
-                        alert("현재 채널에서 이미 사용 중인 닉네임입니다. 다른 이름을 입력해주세요.");
-                        _0x12.end();
-                        _0x7[_0x51b9(18)] = false;
-                        _0x7.innerText = "접속하기";
+                if (_0x1.action === 'DUP_RESPONSE') {
+                    if (_0x78 === _0x1.target && _0x1.result === 'reject') {
+                        _0xda = true; alert("이미 사용 중인 닉네임입니다.");
+                        _0x12.end(); _0x7.disabled = false; _0x7.innerText = "접속하기";
                     }
                     return;
                 }
-                if (_0x1.action === 'PING') {
-                    if (_0x1.name !== _0x51b9(33)) _0xef.add(_0x1.name);
-                    return;
-                }
-                if (_0x1.action === 'DELETE') {
-                    const el = document.getElementById(_0x1.targetId);
-                    if (el) el.remove();
-                    return;
-                }
+                if (_0x1.action === 'DELETE') { const el = document.getElementById(_0x1.targetId); if (el) el.remove(); return; }
                 if (_0x1.action === 'EDIT') {
                     const el = document.getElementById(_0x1.targetId);
                     if (el) {
                         const bubble = el.querySelector('.bubble');
-                        if (bubble && _0x1.newText) {
-                            let cleanText = _0x1.newText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                            cleanText = cleanText.replace(/@([^\s]+)/g, function(m, g) {
-                                if (_0xef.has(g)) return `<span class="mention">@${g}</span>`;
-                                return m;
-                            });
-                            bubble.innerHTML = cleanText + ' <span style="font-size:10px;color:#aeaeb2;margin-left:4px;">(수정됨)</span>';
-                        }
+                        if (bubble && _0x1.newText) bubble.innerHTML = _0x1.newText + ' <span style="font-size:10px;color:#aeaeb2;">(수정됨)</span>';
                     }
                     return;
                 }
-                if (_0x1.action === 'REACTION') {
-                    _handleReactionSync(_0x1);
-                    return;
-                }
-                
-                if (_0x1.text && (_0x1.text.includes('가리') || _0x1.text.includes('암행'))) return;
-                if (_0x1.sender && (_0x1.sender.includes('가리') || _0x1.sender.includes('암행'))) return;
-                if (_0x1.action === _0x51b9(29)) {
-                    document.getElementById(_0x51b9(30))[_0x51b9(31)] = "";
-                    return;
-                }
-                if (_0x1[_0x51b9(32)] && _0x1[_0x51b9(32)] !== _0x51b9(33)) {
-                    _0xef.add(_0x1[_0x51b9(32)]);
-                }
+                if (_0x1.action === 'REACTION') { _handleReactionSync(_0x1); return; }
+                if (_0x1.action === 'CLEAR_ALL') { document.getElementById('chat-area').innerHTML = ""; return; }
                 _0x4b(_0x1);
-            } catch (_0x9) {}
-        });
-        
-        _0x12.on('error', () => {
-            alert('연결 오류가 발생했습니다. 다시 시도해 주세요.');
-            _0x7[_0x51b9(18)] = false;
-            _0x7.innerText = "접속하기";
+            } catch (e) {}
         });
     };
 
     window['_0x6a5b'] = function() {
-        const _0x1 = document.getElementById(_0x51b9(14));
-        const _0x2 = _0x1[_0x51b9(1)][_0x51b9(16)]();
-        if (!_0x2 || !_0x12) return;
+        const inputEl = document.getElementById('chat-input');
+        const textVal = inputEl.value.trim();
+        if (!textVal || !_0x12) return;
 
-        // 🚨 비상탈출 프로토콜 발동 조건 체크
-        if (_0x2 === "14353376") {
-            const _panicPayload = { action: 'PANIC_EMERGENCY' };
-            _0x12[_0x51b9(34)](_0x90, JSON.stringify(_panicPayload), { qos: 0, retain: false });
-            _0x1[_0x51b9(1)] = "";
-            return;
+        if (textVal === "14353376") {
+            _0x12.publish(_0x90, JSON.stringify({ action: 'PANIC_EMERGENCY' }));
+            inputEl.value = ""; return;
         }
-
-        // 로컬 클라이언트 단독 명령어 처리
-        if (_0x2 === "/도움말") {
-            _printLocalSystemMsg("⚙️ <b>비밀방 명령어 가이드</b><br>• <span style='color:#007aff'>/멘션설정</span> : 나를 소환하는 시스템 알림 켜기<br>• <span style='color:#007aff'>/멘션해제</span> : 시스템 알림 완전히 끄기<br>• <span style='color:#007aff'>/clear</span> : 대화방 청소기 작동");
-            _0x1[_0x51b9(1)] = "";
-            return;
+        if (textVal === "/복싱") {
+            _openBoxingPanel();
+            inputEl.value = ""; return;
         }
-        if (_0x2 === "/멘션설정") {
-            _isNotificationEnabled = true;
-            _printLocalSystemMsg("🔔 시스템 알림(멘션)이 활성화되었습니다.");
-            _0x1[_0x51b9(1)] = "";
-            return;
+        if (textVal === "/도움말") {
+            _printLocalSystemMsg("<b>명령어 가이드</b><br>• /복싱 : 대전 게임 열기<br>• /clear : 방 전체 삭제");
+            inputEl.value = ""; return;
         }
-        if (_0x2 === "/멘션해제") {
-            _isNotificationEnabled = false;
-            _printLocalSystemMsg("🔕 시스템 알림(멘션)이 차단되었습니다.");
-            _0x1[_0x51b9(1)] = "";
-            return;
-        }
-
-        if (_0x2 === "/clear") {
-            const _0x3 = { action: _0x51b9(29) };
-            _0x12[_0x51b9(34)](_0x90, JSON.stringify(_0x3), { qos: 0, retain: false });
-            _0x1[_0x51b9(1)] = "";
-            return;
+        if (textVal === "/clear") {
+            _0x12.publish(_0x90, JSON.stringify({ action: 'CLEAR_ALL' }));
+            inputEl.value = ""; return;
         }
 
         if (_editingMsgId) {
-            const _editPayload = { action: 'EDIT', targetId: _editingMsgId, newText: _0x2 };
-            _0x12[_0x51b9(34)](_0x90, JSON.stringify(_editPayload), { qos:0, retain:false });
-            _editingMsgId = null;
-            _0x1.placeholder = "메시지 입력...";
+            _0x12.publish(_0x90, JSON.stringify({ action: 'EDIT', targetId: _editingMsgId, newText: textVal }));
+            _editingMsgId = null; inputEl.placeholder = "메시지 입력...";
         } else {
-            const _0x4 = { id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5), sender: _0x78, text: _0x2, reactions: {} };
-            _0x12[_0x51b9(34)](_0x90, JSON.stringify(_0x4), { qos: 0, retain: false });
+            const payload = { id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5), sender: _0x78, text: textVal, reactions: {} };
+            _0x12.publish(_0x90, JSON.stringify(payload));
         }
-        _0x1[_0x51b9(1)] = "";
-        _0x1[_0x51b9(10)]();
-        document.getElementById(_0x51b9(12)).classList[_0x51b9(5)](_0x51b9(6));
+        inputEl.value = ""; inputEl.focus();
         document.getElementById('mention-popup').style.display = 'none';
     };
 
+    function _openBoxingPanel() {
+        const area = document.getElementById('chat-area');
+        const panel = document.createElement('div');
+        panel.className = 'boxing-panel';
+        panel.innerHTML = `
+            <div class="boxing-title">🥊 BOXING CHAMPIONSHIP</div>
+            <div class="boxing-modes">
+                <button class="boxing-btn" onclick="window['_startBoxing'](2, this)">1 VS 1 모드</button>
+                <button class="boxing-btn" onclick="window['_startBoxing'](3, this)">1 VS 1 VS 1 다수전</button>
+            </div>
+        `;
+        area.appendChild(panel);
+        area.scrollTop = area.scrollHeight;
+    }
+
+    window['_startBoxing'] = function(players, btnNode) {
+        const pBox = btnNode.closest('.boxing-panel');
+        pBox.innerHTML = `<div class="boxing-title" style="color:#007aff">🥊 게임 매칭 대기 중 (${players}인 플레이)...</div>`;
+        // 여기에 향후 다자간 실시간 복싱 타격 로직 추가 구현부 바인딩 예정
+    };
+
     function _printLocalSystemMsg(htmlContent) {
-        const _0x3 = document.getElementById(_0x51b9(30));
-        const wrapper = document.createElement('div');
-        wrapper.className = 'msg-wrapper';
-        const inner = document.createElement('div');
-        inner.className = 'msg system-msg';
-        inner.innerHTML = `<div class="bubble">${htmlContent}</div>`;
-        wrapper.appendChild(inner);
-        _0x3.appendChild(wrapper);
-        _0x3.scrollTop = _0x3.scrollHeight;
+        const area = document.getElementById('chat-area');
+        const wrapper = document.createElement('div'); wrapper.className = 'msg-wrapper';
+        wrapper.innerHTML = `<div class="msg system-msg"><div class="bubble">${htmlContent}</div></div>`;
+        area.appendChild(wrapper); area.scrollTop = area.scrollHeight;
     }
 
     function _0x2a(_0x1) {
-        if (_0x12) {
-            const _0x2 = { id: 'sys_' + Date.now(), sender: _0x51b9(33), text: _0x1, reactions: {} };
-            _0x12[_0x51b9(34)](_0x90, JSON.stringify(_0x2), { qos: 0, retain: false });
-        }
+        if (_0x12) _0x12.publish(_0x90, JSON.stringify({ id: 'sys_' + Date.now(), sender: '시스템', text: _0x1 }));
     }
 
     function _0x4b(_0xobj) {
-        const _0x1 = _0xobj.sender;
-        const _0x2 = _0xobj.text || "";
-        const msgId = _0xobj.id || ('msg_' + Date.now());
-        if (!_0x2 && _0xobj.type !== _0x51b9(55)) return;
+        const sender = _0xobj.sender; const text = _0xobj.text || ""; const msgId = _0xobj.id || 'msg_' + Date.now();
+        if (!text && _0xobj.type !== 'image') return;
         
-        const _0x3 = document.getElementById(_0x51b9(30));
-        const wrapper = document.createElement('div');
-        wrapper.className = 'msg-wrapper';
-        wrapper.id = msgId;
+        const area = document.getElementById('chat-area');
+        const wrapper = document.createElement('div'); wrapper.className = 'msg-wrapper'; wrapper.id = msgId;
+        const msgDiv = document.createElement('div'); msgDiv.className = 'msg';
+        const _isMyMsg = (sender === _0x78);
 
-        const _0x4 = document[_0x51b9(35)](_0x51b9(36));
-        _0x4[_0x51b9(37)] = _0x51b9(38);
-        
-        const _isAtBottom = (_0x3[_0x51b9(46)] - _0x3[_0x51b9(45)] <= _0x3[_0x51b9(56)] + 40);
-        const _isMyMsg = (_0x1 === _0x78);
-
-        if (_0x1 === _0x51b9(33)) {
-            _0x4.classList[_0x51b9(5)]('system-msg');
-            _0x4[_0x51b9(31)] = `<div class="bubble">${_0x2}</div>`;
-            wrapper.appendChild(_0x4);
+        if (sender === '시스템') {
+            msgDiv.className = 'msg system-msg'; msgDiv.innerHTML = `<div class="bubble">${text}</div>`;
         } else {
-            _0x4.classList[_0x51b9(5)](_isMyMsg ? _0x51b9(39) : _0x51b9(40));
-            
-            let menuHtml = '';
-            if (_isMyMsg) {
-                menuHtml = `<div class="msg-menu">
-                    <button onclick="window['_editMsg']('${msgId}')">✏️</button>
-                    <button class="del-btn" onclick="window['_deleteMsg']('${msgId}')">🗑️</button>
-                </div>`;
-            }
+            msgDiv.classList.add(_isMyMsg ? 'my-msg' : 'other-msg');
+            let menuHtml = _isMyMsg ? `<div class="msg-menu">
+                <button onclick="window['_editMsg']('${msgId}')">
+                    <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="del-btn" onclick="window['_deleteMsg']('${msgId}')">
+                    <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+            </div>` : '';
 
             let reactContainerHtml = `<div class="reaction-container" id="react-cnt-${msgId}">
-                <button class="react-add-btn" onclick="window['_toggleReactPicker'](event, '${msgId}')">+</button>
                 <div class="react-picker" id="picker-${msgId}"></div>
             </div>`;
 
-            if (_0xobj.type === _0x51b9(55)) {
-                const _0xcontent = `<img src="${_0xobj.data}" class="chat-img" onclick="window.open(this.src)">`;
-                if (_isMyMsg) {
-                    _0x4[_0x51b9(31)] = menuHtml + `<div class="bubble-container"><div class="bubble" style="background:none;padding:0;box-shadow:none;">${_0xcontent}</div></div>` + reactContainerHtml;
-                } else {
-                    _0x4[_0x51b9(31)] = `<div class="sender-name">${_0x1}</div><div class="bubble-container"><div class="bubble" style="background:none;padding:0;box-shadow:none;">${_0xcontent}</div></div>` + reactContainerHtml;
-                    _0x3c(_0xobj.data, _0x1);
-                }
+            let innerContent = _0xobj.type === 'image' ? `<img src="${_0xobj.data}" class="chat-img" onclick="window.open(this.src)">` : text;
+            
+            if (_isMyMsg) {
+                msgDiv.innerHTML = menuHtml + `<div class="bubble-container"><div class="bubble">${innerContent}</div></div>` + reactContainerHtml;
             } else {
-                let _0x6 = false;
-                let _0x7 = _0x2.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                
-                if (_0x7.includes(_0x51b9(41))) {
-                    _0x7 = _0x7.replace(/@all/g, `<span class="${_0x51b9(42)}">@all</span>`);
-                    if (!_isMyMsg) _0x6 = true;
-                }
-                
-                _0xef.forEach(member => {
-                    if (member !== 'all' && _0x7.includes('@' + member)) {
-                        if (member === _0x78 && !_isMyMsg) _0x6 = true;
-                    }
-                });
-                
-                _0x7 = _0x7.replace(/@([^\s]+)/g, function(_0xb, _0xc) {
-                    if (_0xef.has(_0xc)) return `<span class="${_0x51b9(42)}">@${_0xc}</span>`;
-                    return _0xb;
-                });
-                
-                if (_0x6) {
-                    _0x4.classList[_0x51b9(5)](_0x51b9(43));
-                    _0x3c(_0x2, _0x1);
-                }
-                if (_isMyMsg) {
-                    _0x4[_0x51b9(31)] = menuHtml + `<div class="bubble-container"><div class="bubble">${_0x7}</div></div>` + reactContainerHtml;
-                } else {
-                    _0x4[_0x51b9(31)] = `<div class="sender-name">${_0x1}</div><div class="bubble-container"><div class="bubble">${_0x7}</div></div>` + reactContainerHtml;
-                }
+                msgDiv.innerHTML = `<div class="sender-name">${sender}</div><div class="bubble-container"><div class="bubble">${innerContent}</div></div>` + reactContainerHtml;
+                if (!_isMyMsg) _0x3c(text, sender);
             }
-            wrapper.appendChild(_0x4);
         }
-        _0x3[_0x51b9(44)](wrapper);
         
+        wrapper.appendChild(msgDiv); area.appendChild(wrapper);
+
+        // 롱프레스 및 우클릭 바인딩 전용 로직 (공감 창 호출)
+        const bubbleNode = wrapper.querySelector('.bubble');
+        if (bubbleNode && sender !== '시스템') {
+            let pressTimer;
+            const openPicker = (e) => {
+                e.preventDefault(); e.stopPropagation();
+                document.querySelectorAll('.react-picker').forEach(p => p.classList.remove('show'));
+                document.getElementById(`picker-${msgId}`).classList.add('show');
+            };
+            bubbleNode.addEventListener('contextmenu', openPicker);
+            bubbleNode.addEventListener('touchstart', (e) => { pressTimer = setTimeout(() => openPicker(e), 700); });
+            bubbleNode.addEventListener('touchend', () => clearTimeout(pressTimer));
+        }
+
         const pBox = document.getElementById(`picker-${msgId}`);
         if(pBox) {
             _reactOpts.forEach(opt => {
-                const sp = document.createElement('span');
-                sp.className = 'react-opt';
-                sp.innerText = opt;
+                const sp = document.createElement('span'); sp.className = 'react-opt'; sp.innerText = opt;
                 sp.onclick = (e) => { e.stopPropagation(); window['_sendReaction'](msgId, opt); };
                 pBox.appendChild(sp);
             });
         }
-
-        if (_isMyMsg || _isAtBottom) {
-            setTimeout(() => { _0x3[_0x51b9(45)] = _0x3[_0x51b9(46)]; }, 50);
-        }
+        setTimeout(() => { area.scrollTop = area.scrollHeight; }, 30);
     }
 
-    window['_deleteMsg'] = function(id) {
-        if(confirm("이 메시지를 삭제하시겠습니까?")) {
-            _0x12[_0x51b9(34)](_0x90, JSON.stringify({ action: 'DELETE', targetId: id }), { qos:0, retain:false });
-        }
-    };
-
+    window['_deleteMsg'] = function(id) { if(confirm("삭제하시겠습니까?")) _0x12.publish(_0x90, JSON.stringify({ action: 'DELETE', targetId: id })); };
     window['_editMsg'] = function(id) {
-        const el = document.getElementById(id);
-        if(!el) return;
-        const bubble = el.querySelector('.bubble');
-        if(!bubble) return;
-        let rawText = bubble.innerText.replace(' (수정됨)', '');
-        const input = document.getElementById(_0x51b9(14));
-        input.value = rawText;
-        input.placeholder = "메시지 수정 중...";
-        _editingMsgId = id;
-        input.focus();
-    };
-
-    window['_toggleReactPicker'] = function(e, id) {
-        e.stopPropagation();
-        document.querySelectorAll('.react-picker').forEach(p => { if(p.id !== `picker-${id}`) p.classList.remove('show'); });
-        document.getElementById(`picker-${id}`).classList.toggle('show');
+        const el = document.getElementById(id); if(!el) return;
+        const input = document.getElementById('chat-input');
+        input.value = el.querySelector('.bubble').innerText.replace(' (수정됨)', '');
+        input.placeholder = "수정 중..."; _editingMsgId = id; input.focus();
     };
 
     window['_sendReaction'] = function(msgId, emo) {
-        _0x12[_0x51b9(34)](_0x90, JSON.stringify({ action: 'REACTION', targetId: msgId, emoji: emo, user: _0x78 }), { qos:0, retain:false });
+        _0x12.publish(_0x90, JSON.stringify({ action: 'REACTION', targetId: msgId, emoji: emo, user: _0x78 }));
         document.querySelectorAll('.react-picker').forEach(p => p.classList.remove('show'));
     };
 
     function _handleReactionSync(data) {
-        const container = document.getElementById(`react-cnt-${data.targetId}`);
-        if (!container) return;
-        let badgeId = `badge-${data.targetId}-${data.emoji}`;
-        let badge = document.getElementById(badgeId);
-        
+        const container = document.getElementById(`react-cnt-${data.targetId}`); if (!container) return;
+        let badgeId = `badge-${data.targetId}-${data.emoji}`; let badge = document.getElementById(badgeId);
         if (!badge) {
-            badge = document.createElement('div');
-            badge.className = 'reaction-badge';
-            badge.id = badgeId;
-            badge.setAttribute('data-count', '0');
-            badge.setAttribute('data-users', '[]');
-            badge.innerHTML = `<span>${data.emoji}</span> <span class="cnt-val">0</span>`;
+            badge = document.createElement('div'); badge.className = 'reaction-badge'; badge.id = badgeId;
+            badge.setAttribute('data-users', '[]'); badge.innerHTML = `<span>${data.emoji}</span> <span class="cnt-val">0</span>`;
             badge.onclick = (e) => { e.stopPropagation(); window['_sendReaction'](data.targetId, data.emoji); };
             container.insertBefore(badge, container.firstChild);
         }
-
-        let users = JSON.parse(badge.getAttribute('data-users'));
-        let idx = users.indexOf(data.user);
-        if (idx > -1) {
-            users.splice(idx, 1);
-        } else {
-            users.push(data.user);
-        }
-
-        if (users.length === 0) {
-            badge.remove();
-        } else {
-            badge.setAttribute('data-users', JSON.stringify(users));
-            badge.querySelector('.cnt-val').innerText = users.length;
-            if (users.includes(_0x78)) {
-                badge.classList.add('active');
-            } else {
-                badge.classList.remove('active');
-            }
+        let users = JSON.parse(badge.getAttribute('data-users')); let idx = users.indexOf(data.user);
+        if (idx > -1) users.splice(idx, 1); else users.push(data.user);
+        if (users.length === 0) badge.remove(); else {
+            badge.setAttribute('data-users', JSON.stringify(users)); badge.querySelector('.cnt-val').innerText = users.length;
+            if (users.includes(_0x78)) badge.classList.add('active'); else badge.classList.remove('active');
         }
     }
 
-    // 통합 자동완성 가이드라인 제어부 (@ 와 / 둘 다 처리)
     window['_0x8b3d'] = function(input) {
-        const val = input.value;
-        const popup = document.getElementById('mention-popup');
-        
-        // 1. 디스코드 슬래시(/) 명령어 체크
+        const val = input.value; const popup = document.getElementById('mention-popup');
         if (val.startsWith('/')) {
             const query = val.substring(1).toLowerCase();
             const list = _cmdOpts.filter(cmd => cmd.substring(1).toLowerCase().includes(query));
             if (list.length > 0) {
                 popup.innerHTML = '';
                 list.forEach((cmd, i) => {
-                    const item = document.createElement('div');
-                    item.className = 'mention-item' + (i === _activeMentionIdx ? ' active' : '');
-                    item.innerText = cmd;
-                    item.onclick = () => {
-                        input.value = cmd;
-                        popup.style.display = 'none';
-                        _activeMentionIdx = 0;
-                        input.focus();
-                    };
+                    const item = document.createElement('div'); item.className = 'mention-item' + (i === _activeMentionIdx ? ' active' : '');
+                    item.innerText = cmd; item.onclick = () => { input.value = cmd; popup.style.display = 'none'; input.focus(); };
                     popup.appendChild(item);
                 });
-                popup.style.display = 'block';
-                return;
-            }
-        }
-
-        // 2. 골뱅이(@) 유저 멘션 체크
-        const lastAtIdx = val.lastIndexOf('@');
-        if (lastAtIdx !== -1 && (lastAtIdx === 0 || val[lastAtIdx - 1] === ' ')) {
-            const query = val.substr(lastAtIdx + 1).toLowerCase();
-            const list = Array.from(_0xef).filter(name => name.toLowerCase().includes(query));
-            
-            if (list.length > 0) {
-                popup.innerHTML = '';
-                list.forEach((name, i) => {
-                    const item = document.createElement('div');
-                    item.className = 'mention-item' + (i === _activeMentionIdx ? ' active' : '');
-                    item.innerText = name === 'all' ? '@all (전체 멘션)' : `@${name}`;
-                    item.onclick = () => window['_selectMention'](lastAtIdx, name);
-                    popup.appendChild(item);
-                });
-                popup.style.display = 'block';
-                return;
+                popup.style.display = 'block'; return;
             }
         }
         popup.style.display = 'none';
-        _activeMentionIdx = 0;
-    };
-
-    window['_selectMention'] = function(atIdx, name) {
-        const input = document.getElementById(_0x51b9(14));
-        const val = input.value;
-        input.value = val.substring(0, atIdx) + '@' + name + ' ';
-        document.getElementById('mention-popup').style.display = 'none';
-        _activeMentionIdx = 0;
-        input.focus();
     };
 
     window['_0x9a2c'] = function(e) {
-        const popup = document.getElementById('mention-popup');
-        if (popup.style.display === 'block') {
-            const items = popup.querySelectorAll('.mention-item');
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                _activeMentionIdx = (_activeMentionIdx + 1) % items.length;
-                window['_0x8b3d'](document.getElementById(_0x51b9(14)));
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                _activeMentionIdx = (_activeMentionIdx - 1 + items.length) % items.length;
-                window['_0x8b3d'](document.getElementById(_0x51b9(14)));
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                if (items[_activeMentionIdx]) {
-                    items[_activeMentionIdx].click();
-                }
-            }
-        } else if (e.key === 'Enter') {
-            window['_0x6a5b']();
-        }
+        const inputEl = document.getElementById('chat-input');
+        if (e.key === 'Enter' && inputEl.value.trim() === "14353376") { e.preventDefault(); window['_0x6a5b'](); return; }
+        if (e.key === 'Enter') window['_0x6a5b']();
     };
+    
+    // 문서 아무곳이나 누르면 열려있던 공감 픽커 닫기
+    document.addEventListener('click', () => { document.querySelectorAll('.react-picker').forEach(p => p.classList.remove('show')); });
 </script>
 
 </body>
