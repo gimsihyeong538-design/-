@@ -998,8 +998,6 @@ body {
 </div>
 
 <div id="lightbox" class="hidden" onclick="closeLightbox()">
-  <img id="lightbox-img" src="" alt="">
-</div>
 
 <script>
 'use strict';
@@ -1018,7 +1016,9 @@ const CMDS = [
   { name: '/도움말', desc: '명령어 목록' },
   { name: '/닉네임', desc: '닉네임 확인' },
   { name: '/방번호', desc: '채널 번호 확인' },
-  { name: '/멘션', desc: 'on / off' }
+  { name: '/멘션', desc: 'on / off' },
+  { name: '/참가', desc: '복싱 게임 참가' },
+  { name: '/랭킹', desc: '티어 랭킹 보기' }
 ];
 
 let popupFiltered = [];
@@ -1483,6 +1483,12 @@ function handleCommand(raw) {
       if (parts[1] === 'on') { mentionEnabled = true; addSys('멘션 알림 켜짐'); }
       else if (parts[1] === 'off') { mentionEnabled = false; addSys('멘션 알림 꺼짐'); }
       else { addSys('/멘션 on 또는 /멘션 off'); }
+      break;
+    case '/참가':
+      openBoxingGame();
+      break;
+    case '/랭킹':
+      openRankingUI();
       break;
     default:
       addSys('알 수 없는 명령어: ' + cmd);
