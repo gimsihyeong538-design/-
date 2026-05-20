@@ -603,8 +603,8 @@ body {
 #emergency-panel {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -614,43 +614,43 @@ body {
 @keyframes fadeInBg { from{opacity:0} to{opacity:1} }
 
 .emergency-card {
-  background: #111118;
-  border: 1px solid rgba(239,68,68,0.2);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 38px 42px;
-  max-width: 370px;
+  padding: 36px 40px;
+  max-width: 360px;
   width: 90%;
   text-align: center;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  box-shadow: var(--shadow-lg);
   animation: slideUp 0.22s cubic-bezier(0.34,1.56,0.64,1);
 }
 @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
 
 .e-badge {
   display: inline-block;
-  background: rgba(239,68,68,0.12);
-  border: 1px solid rgba(239,68,68,0.25);
+  background: var(--bg);
+  border: 1px solid var(--border);
   border-radius: 100px;
   padding: 3px 12px;
   font-size: 11px;
-  font-weight: 700;
-  color: #f87171;
-  letter-spacing: 1px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.5px;
   margin-bottom: 14px;
   text-transform: uppercase;
   font-family: var(--font-mono);
 }
-.e-title { font-size: 20px; font-weight: 600; color: #f87171; margin-bottom: 12px; }
-.e-desc { font-size: 13.5px; color: #6b6b80; line-height: 1.65; margin-bottom: 28px; }
-.e-desc strong { color: #a0a0be; }
+.e-title { font-size: 19px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+.e-desc { font-size: 13.5px; color: var(--muted); line-height: 1.65; margin-bottom: 26px; }
+.e-desc strong { color: var(--text); }
 
 .emergency-btns { display: flex; gap: 10px; justify-content: center; }
 .e-btn-accept {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 10px;
-  padding: 12px 28px;
+  padding: 11px 26px;
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
@@ -661,18 +661,18 @@ body {
 .e-btn-accept:active { transform: scale(0.97); }
 
 .e-btn-reject {
-  background: #1e1e2a;
-  color: #6b6b80;
-  border: 1px solid #2e2e3e;
+  background: var(--bg);
+  color: var(--muted);
+  border: 1.5px solid var(--border);
   border-radius: 10px;
-  padding: 12px 28px;
+  padding: 11px 26px;
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
   font-family: var(--font);
-  transition: background 0.15s, color 0.15s;
+  transition: border-color 0.15s, color 0.15s;
 }
-.e-btn-reject:hover { background: #252530; color: #9090a8; }
+.e-btn-reject:hover { border-color: var(--text); color: var(--text); }
 
 #screen-disguise { min-height: 100vh; background: var(--surface); }
 
@@ -813,7 +813,6 @@ body {
     </div>
     <div class="main-btns">
       <button onclick="doMainSearch()">Axion 검색</button>
-      <button onclick="window.location.href='https://www.google.com'">행운의 검색</button>
     </div>
   </div>
 
@@ -864,10 +863,8 @@ body {
     <button id="emoji-btn" class="action-btn" title="이모지">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="10"/>
-        <circle cx="9" cy="9.5" r="1.2" fill="currentColor" stroke="none"/>
-        <circle cx="15" cy="9.5" r="1.2" fill="currentColor" stroke="none"/>
-        <circle cx="9" cy="9" r="0.5" fill="white" stroke="none"/>
-        <circle cx="15" cy="9" r="0.5" fill="white" stroke="none"/>
+        <circle cx="9" cy="9.5" r="0.7" fill="currentColor" stroke="none"/>
+        <circle cx="15" cy="9.5" r="0.7" fill="currentColor" stroke="none"/>
         <path d="M8 14.5s1.5 2 4 2 4-2 4-2"/>
       </svg>
     </button>
@@ -889,16 +886,15 @@ body {
 
 <div id="emergency-panel" class="hidden">
   <div class="emergency-card">
-    <div class="e-badge">Emergency Protocol</div>
-    <div class="e-title">비상 프로토콜 감지됨</div>
+    <div class="e-badge">비상 프로토콜</div>
+    <div class="e-title">채널 초기화</div>
     <div class="e-desc">
-      위장 시스템을 가동하시겠습니까?<br>
-      <strong>수락</strong> 시 검색 결과 화면으로 전환됩니다.<br>
-      <strong>거절</strong> 시 이전 화면으로 돌아갑니다.
+      모든 사용자를 기본 화면으로 이동하고<br>채팅 내역을 삭제합니다.<br><br>
+      <strong>이 작업은 되돌릴 수 없습니다.</strong>
     </div>
     <div class="emergency-btns">
-      <button class="e-btn-accept" onclick="acceptEmergency()">✓ 수락</button>
-      <button class="e-btn-reject" onclick="rejectEmergency()">✕ 거절</button>
+      <button class="e-btn-accept" onclick="acceptEmergency()">실행</button>
+      <button class="e-btn-reject" onclick="rejectEmergency()">취소</button>
     </div>
   </div>
 </div>
@@ -1043,10 +1039,14 @@ document.getElementById('setup-room').addEventListener('keydown', e => {
   if (e.key === 'Enter') joinChat();
 });
 
+const BANNED_CHARS = ['신', '순', '자'];
+
 function joinChat() {
   const nick = document.getElementById('setup-nick').value.trim();
   const room = document.getElementById('setup-room').value.trim();
   if (!nick || nick.length < 2) { showToast('닉네임은 최소 2자 이상이어야 합니다'); return; }
+  const banned = BANNED_CHARS.find(c => nick.includes(c));
+  if (banned) { showToast('검열된 닉네임입니다. 사용할 수 없습니다.'); return; }
   if (!room) { showToast('채널 번호를 입력하세요'); return; }
   myNick = nick;
   roomId = room;
@@ -1099,6 +1099,12 @@ function connectMQTT() {
 
 function handleMsg(sub, data) {
   switch(sub) {
+    case 'emergency':
+      if (data.action === 'reset') {
+        document.getElementById('emergency-panel').classList.add('hidden');
+        doEmergencyReset();
+      }
+      break;
     case 'join':
       if (data.nick === myNick) return;
       onlineUsers.add(data.nick);
@@ -1427,24 +1433,26 @@ document.getElementById('file-input').addEventListener('change', e => {
 
 function acceptEmergency() {
   document.getElementById('emergency-panel').classList.add('hidden');
-  document.getElementById('screen-main-wrap').classList.add('hidden');
-  document.getElementById('screen-chat').classList.add('hidden');
-  document.getElementById('screen-disguise').classList.remove('hidden');
+  publish('emergency', { action: 'reset' });
+  doEmergencyReset();
 }
 
 function rejectEmergency() {
   document.getElementById('emergency-panel').classList.add('hidden');
 }
 
-document.getElementById('d-logo-back').addEventListener('click', () => {
-  document.getElementById('screen-disguise').classList.add('hidden');
-  if (roomId) {
-    document.getElementById('screen-chat').classList.remove('hidden');
-    scrollBottom();
-  } else {
-    document.getElementById('screen-main-wrap').classList.remove('hidden');
-  }
-});
+function doEmergencyReset() {
+  document.getElementById('messages-area').innerHTML = '';
+  messages = {};
+  onlineUsers = new Set();
+  if (mqttClient) { mqttClient.end(true); mqttClient = null; }
+  myNick = ''; roomId = ''; baseTopic = '';
+  document.getElementById('setup-nick').value = '';
+  document.getElementById('setup-room').value = '';
+  showScreen('screen-main-wrap');
+  document.getElementById('main-search').value = '';
+  document.getElementById('main-search').focus();
+}
 
 document.querySelectorAll('.d-tab').forEach(tab => {
   tab.addEventListener('click', () => {
