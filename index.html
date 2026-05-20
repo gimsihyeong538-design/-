@@ -1372,17 +1372,25 @@ function showCmdPopup(input) {
 
 function showMentionPopup(search) {
   const popup = document.getElementById('cmd-popup');
+  // 나를 포함한 접속 중인 모든 유저 목록 리스트 구성
   const allUsers = Array.from(onlineUsers);
-  popupFiltered = allUsers.filter(u => u.toLowerCase().startsWith(search.toLowerCase()));
+  if (!allUsers.includes(myNick)) {
+    allUsers.push(myNick);
+  }
+  
+  popupFiltered = allUsers
+    .filter(u => u.toLowerCase().startsWith(search.toLowerCase()))
+    .map(u => ({ name: '@' + u, desc: '유저 멘션' }));
+
   if (!popupFiltered.length) {
     hidePopup();
     return;
   }
   popup.innerHTML = '';
-  popupFiltered.forEach((u, i) => {
+  popupFiltered.forEach((itemData, i) => {
     const item = document.createElement('div');
     item.className = 'cmd-item';
-    item.innerHTML = `<span class="cmd-name">@${u}</span>`;
+    item.innerHTML = `<span class="cmd-name">${itemData.name}</span><span class="cmd-desc">${itemData.desc}</span>`;
     item.onclick = () => selectPopupItem(i);
     popup.appendChild(item);
   });
@@ -1418,7 +1426,7 @@ function selectPopupItem(idx) {
   if (popupMode === 'cmd') {
     words.push(popupFiltered[idx].name);
   } else if (popupMode === 'mention') {
-    words.push('@' + popupFiltered[idx]);
+    words.push(popupFiltered[idx].name);
   }
   inp.value = words.join(' ') + ' ';
   inp.focus();
@@ -1465,6 +1473,16 @@ function handleCommand(raw) {
       } else {
         addSys('/멘션 on 또는 /멘션 off');
       }
+      break;
+    case '/참가':
+      addSys(`[🥊 복싱] ${myNick}님이 복싱 경기 참가 등록을 완료했습니다!`);
+      break;
+    case '/랭킹':
+      addSys('[🏆 복싱 티어 랭킹]');
+      addSys('1위. 챔피언 - Tyson (2400p)');
+      addSys('2위. 다이아 - Ali (2150p)');
+      addSys('3위. 플래티넘 - Marciano (1800p)');
+      addSys(`현재 회원님의 점수: ${myNick} (1000p - 배치 대기중)`);
       break;
     default:
       addSys('알 수 없는 명령어: ' + cmd);
