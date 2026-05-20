@@ -266,6 +266,7 @@ body {
   flex-direction: column;
   height: 100vh;
   background: var(--bg);
+  position: relative;
 }
 
 #chat-topbar {
@@ -581,29 +582,93 @@ body {
   left: 14px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   box-shadow: var(--shadow-lg);
-  padding: 8px;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 4px;
   z-index: 100;
   animation: fadeUp 0.14s ease;
+  width: 300px;
+  overflow: hidden;
 }
-#emoji-picker span {
-  font-size: 19px;
+.emoji-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  padding: 6px 6px 0;
+  gap: 2px;
+}
+.emoji-tab {
+  flex: 1;
+  background: none;
+  border: none;
   cursor: pointer;
-  padding: 5px;
+  font-size: 16px;
+  padding: 6px 4px;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 2px solid transparent;
+  transition: background 0.1s;
+}
+.emoji-tab.active { border-bottom-color: var(--accent); background: var(--accent-soft); }
+.emoji-tab:hover:not(.active) { background: var(--bg); }
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  padding: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.emoji-grid::-webkit-scrollbar { width: 3px; }
+.emoji-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.emoji-grid span {
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
   text-align: center;
   border-radius: 6px;
-  transition: background 0.12s, transform 0.1s;
+  transition: background 0.1s, transform 0.1s;
+  line-height: 1.3;
 }
-#emoji-picker span:hover { background: var(--bg); transform: scale(1.15); }
+.emoji-grid span:hover { background: var(--bg); transform: scale(1.2); }
 
-#emergency-panel {
+#lightbox {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.88);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+#lightbox img {
+  max-width: 92vw;
+  max-height: 92vh;
+  border-radius: 10px;
+  object-fit: contain;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  cursor: default;
+}
+
+#new-msg-badge {
+  position: absolute;
+  bottom: 68px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 100px;
+  cursor: pointer;
+  z-index: 50;
+  box-shadow: var(--shadow-lg);
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  animation: fadeUp 0.2s ease;
+}
+#new-msg-badge:hover { opacity: 0.88; }
+
+#emergency-panel {
   backdrop-filter: blur(4px);
   z-index: 1000;
   display: flex;
@@ -856,6 +921,8 @@ body {
 
   <div id="messages-area"></div>
 
+  <div id="new-msg-badge" class="hidden"></div>
+
   <div id="cmd-popup" class="hidden"></div>
   <div id="emoji-picker" class="hidden"></div>
 
@@ -946,6 +1013,10 @@ body {
   </div>
 </div>
 
+<div id="lightbox" class="hidden" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="">
+</div>
+
 <script>
 'use strict';
 
@@ -976,20 +1047,54 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+const EMOJI_CATS = {
+  '😀': ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','🥰','😘','😗','🙂','🤗','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','😱','😨','😰','😥','😓','🤔','🤭','🤫','🤥','😐','😑','😬','🙄','😯','😲','🥱','😴','🤤','😷','🤒','🤕','🤢','🤮','🥴','😵','🤯','🥵','🥶'],
+  '👋': ['👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🙏','✍️','💪','🦾','🖐','💅','🤳'],
+  '✨': ['✨','🔥','💥','❄️','🌊','💨','🌈','⭐','🌟','💫','🌙','☀️','⚡','🌊','💧','🎆','🎇','🧨','🎉','🎊','🎈','💯','💢','💬','💭','💤','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝'],
+};
+const EMOJI_CAT_ICONS = { '😀': '😀', '👋': '👋', '✨': '✨' };
+
 const emojiPicker = document.getElementById('emoji-picker');
-const EMOJI_LIST = ['😀','😂','😍','🤔','😭','👍','❤️','🔥','✨','🎉','🙄','😎','🙏','🙌','💡'];
-EMOJI_LIST.forEach(em => {
-  const span = document.createElement('span');
-  span.textContent = em;
-  span.onclick = () => {
-    const inp = document.getElementById('msg-input');
-    inp.value += em;
-    inp.focus();
+let activeEmojiCat = '😀';
+
+function buildEmojiPicker() {
+  emojiPicker.innerHTML = '';
+  const tabs = document.createElement('div');
+  tabs.className = 'emoji-tabs';
+  Object.keys(EMOJI_CATS).forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'emoji-tab' + (cat === activeEmojiCat ? ' active' : '');
+    btn.textContent = EMOJI_CAT_ICONS[cat];
+    btn.title = cat === '😀' ? '표정' : cat === '👋' ? '손동작' : '효과';
+    btn.onclick = () => { activeEmojiCat = cat; buildEmojiPicker(); };
+    tabs.appendChild(btn);
+  });
+  emojiPicker.appendChild(tabs);
+  const grid = document.createElement('div');
+  grid.className = 'emoji-grid';
+  EMOJI_CATS[activeEmojiCat].forEach(em => {
+    const span = document.createElement('span');
+    span.textContent = em;
+    span.onclick = () => {
+      const inp = document.getElementById('msg-input');
+      inp.value += em;
+      inp.focus();
+      emojiPicker.classList.add('hidden');
+    };
+    grid.appendChild(span);
+  });
+  emojiPicker.appendChild(grid);
+}
+
+buildEmojiPicker();
+document.getElementById('emoji-btn').onclick = () => {
+  if (emojiPicker.classList.contains('hidden')) {
+    buildEmojiPicker();
+    emojiPicker.classList.remove('hidden');
+  } else {
     emojiPicker.classList.add('hidden');
-  };
-  emojiPicker.appendChild(span);
-});
-document.getElementById('emoji-btn').onclick = () => emojiPicker.classList.toggle('hidden');
+  }
+};
 
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 function timeStr() {
@@ -1003,10 +1108,39 @@ function showToast(msg, dur = 2600) {
   clearTimeout(t._timer);
   t._timer = setTimeout(() => t.classList.remove('show'), dur);
 }
+let newMsgCount = 0;
+
+function isNearBottom() {
+  const a = document.getElementById('messages-area');
+  return a.scrollHeight - a.scrollTop - a.clientHeight < 80;
+}
+
 function scrollBottom() {
   const a = document.getElementById('messages-area');
   a.scrollTop = a.scrollHeight;
+  newMsgCount = 0;
+  document.getElementById('new-msg-badge').classList.add('hidden');
 }
+
+function smartScroll() {
+  if (isNearBottom()) {
+    scrollBottom();
+  } else {
+    newMsgCount++;
+    const badge = document.getElementById('new-msg-badge');
+    badge.textContent = '새 메시지 ' + newMsgCount + '개 ↓';
+    badge.classList.remove('hidden');
+  }
+}
+
+document.getElementById('messages-area').addEventListener('scroll', () => {
+  if (isNearBottom()) {
+    newMsgCount = 0;
+    document.getElementById('new-msg-badge').classList.add('hidden');
+  }
+});
+
+document.getElementById('new-msg-badge').addEventListener('click', () => scrollBottom());
 function showScreen(id) {
   ['screen-main-wrap','screen-setup','screen-chat','screen-disguise'].forEach(s => {
     const el = document.getElementById(s);
@@ -1220,7 +1354,7 @@ function renderBubble(data, isMine) {
     const img = document.createElement('img');
     img.src = data.imgData;
     img.className = 'bubble-img';
-    img.onclick = () => window.open(data.imgData, '_blank');
+    img.onclick = () => openLightbox(data.imgData);
     bubble.appendChild(img);
   } else {
     const sp = document.createElement('span');
@@ -1239,7 +1373,12 @@ function renderBubble(data, isMine) {
   else { row.appendChild(av); row.appendChild(content); }
 
   area.appendChild(row);
-  scrollBottom();
+
+  if (isMine) {
+    scrollBottom();
+  } else {
+    smartScroll();
+  }
 
   messages[data.id] = { id: data.id, sender: data.sender, text: data.text, type: data.type, row, bubble, isMine };
 }
@@ -1415,6 +1554,21 @@ function deleteBubble(id) {
   delete messages[id];
   publish('delete', { id });
 }
+
+function openLightbox(src) {
+  const lb = document.getElementById('lightbox');
+  document.getElementById('lightbox-img').src = src;
+  lb.classList.remove('hidden');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.add('hidden');
+  document.getElementById('lightbox-img').src = '';
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+});
+
+document.getElementById('lightbox-img').addEventListener('click', e => e.stopPropagation());
 
 document.getElementById('file-btn').onclick = () => document.getElementById('file-input').click();
 document.getElementById('file-input').addEventListener('change', e => {
