@@ -589,31 +589,12 @@ body {
   width: 300px;
   overflow: hidden;
 }
-.emoji-tabs {
-  display: flex;
-  border-bottom: 1px solid var(--border);
-  padding: 6px 6px 0;
-  gap: 2px;
-}
-.emoji-tab {
-  flex: 1;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  padding: 6px 4px;
-  border-radius: 8px 8px 0 0;
-  border-bottom: 2px solid transparent;
-  transition: background 0.1s;
-}
-.emoji-tab.active { border-bottom-color: var(--accent); background: var(--accent-soft); }
-.emoji-tab:hover:not(.active) { background: var(--bg); }
 .emoji-grid {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   gap: 2px;
   padding: 8px;
-  max-height: 200px;
+  max-height: 240px;
   overflow-y: auto;
 }
 .emoji-grid::-webkit-scrollbar { width: 3px; }
@@ -669,6 +650,9 @@ body {
 #new-msg-badge:hover { opacity: 0.88; }
 
 #emergency-panel {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
   backdrop-filter: blur(4px);
   z-index: 1000;
   display: flex;
@@ -1047,32 +1031,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-const EMOJI_CATS = {
-  '😀': ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','🥰','😘','😗','🙂','🤗','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','😱','😨','😰','😥','😓','🤔','🤭','🤫','🤥','😐','😑','😬','🙄','😯','😲','🥱','😴','🤤','😷','🤒','🤕','🤢','🤮','🥴','😵','🤯','🥵','🥶'],
-  '👋': ['👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🙏','✍️','💪','🦾','🖐','💅','🤳'],
-  '✨': ['✨','🔥','💥','❄️','🌊','💨','🌈','⭐','🌟','💫','🌙','☀️','⚡','🌊','💧','🎆','🎇','🧨','🎉','🎊','🎈','💯','💢','💬','💭','💤','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝'],
-};
-const EMOJI_CAT_ICONS = { '😀': '😀', '👋': '👋', '✨': '✨' };
+const ALL_EMOJIS = [
+  '😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','🥰','😘',
+  '😗','🙂','🤗','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖',
+  '😫','😩','🥺','😢','😭','😤','😠','😡','🤬','😱','😨','😰','😥','😓','🤔',
+  '🤭','🤫','🤥','😐','😑','😬','🙄','😯','😲','🥱','😴','🤤','😷','🤒','🤕',
+  '🤢','🤮','🥴','😵','🤯','🥵','🥶','😶','🫠','🫡','🥹',
+  '👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙',
+  '👈','👉','👆','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','🙏',
+  '✍️','💪','🦾','💅','🤳','👐','🤲',
+  '✨','🔥','💥','❄️','🌊','💨','🌈','⭐','🌟','💫','🌙','☀️','⚡','💧',
+  '🎆','🎇','🧨','🎉','🎊','🎈','💯','💢','❤️','🧡','💛','💚','💙','💜',
+  '🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💬','💭','💤',
+];
 
 const emojiPicker = document.getElementById('emoji-picker');
-let activeEmojiCat = '😀';
 
 function buildEmojiPicker() {
   emojiPicker.innerHTML = '';
-  const tabs = document.createElement('div');
-  tabs.className = 'emoji-tabs';
-  Object.keys(EMOJI_CATS).forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = 'emoji-tab' + (cat === activeEmojiCat ? ' active' : '');
-    btn.textContent = EMOJI_CAT_ICONS[cat];
-    btn.title = cat === '😀' ? '표정' : cat === '👋' ? '손동작' : '효과';
-    btn.onclick = () => { activeEmojiCat = cat; buildEmojiPicker(); };
-    tabs.appendChild(btn);
-  });
-  emojiPicker.appendChild(tabs);
   const grid = document.createElement('div');
   grid.className = 'emoji-grid';
-  EMOJI_CATS[activeEmojiCat].forEach(em => {
+  ALL_EMOJIS.forEach(em => {
     const span = document.createElement('span');
     span.textContent = em;
     span.onclick = () => {
@@ -1088,12 +1067,7 @@ function buildEmojiPicker() {
 
 buildEmojiPicker();
 document.getElementById('emoji-btn').onclick = () => {
-  if (emojiPicker.classList.contains('hidden')) {
-    buildEmojiPicker();
-    emojiPicker.classList.remove('hidden');
-  } else {
-    emojiPicker.classList.add('hidden');
-  }
+  emojiPicker.classList.toggle('hidden');
 };
 
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
