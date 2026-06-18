@@ -2,1714 +2,404 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Axion</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.10.1/mqtt.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
-
-:root {
-  --bg: #f7f7f5;
-  --surface: #ffffff;
-  --text: #1c1c1e;
-  --muted: #8e8e93;
-  --border: #e5e5e3;
-  --accent: #2563eb;
-  --accent-soft: #eff4ff;
-  --bubble-in: #ffffff;
-  --bubble-out: #2563eb;
-  --radius-msg: 18px;
-  --font: 'DM Sans', sans-serif;
-  --font-mono: 'DM Mono', monospace;
-  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.10);
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  -webkit-user-select: none;
-  user-select: none;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
-.hidden { display: none !important; }
-
-#toast {
-  position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%) translateY(8px);
-  background: #1c1c1e;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 100px;
-  font-size: 13px;
-  font-weight: 500;
-  z-index: 9999;
-  opacity: 0;
-  transition: opacity 0.25s, transform 0.25s;
-  pointer-events: none;
-  white-space: nowrap;
-  letter-spacing: 0.01em;
-}
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-#screen-main-wrap { min-height: 100vh; display: flex; flex-direction: column; }
-
-#top-nav {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 14px 32px;
-  gap: 22px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-}
-#top-nav a {
-  font-size: 13px;
-  color: var(--muted);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.15s;
-  cursor: pointer;
-}
-#top-nav a:hover { color: var(--text); }
-#top-nav .nav-login {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 100px;
-  padding: 7px 18px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: var(--font);
-  transition: opacity 0.15s;
-}
-#top-nav .nav-login:hover { opacity: 0.88; }
-
-#screen-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  gap: 32px;
-}
-
-.axion-logo {
-  font-size: 72px;
-  font-weight: 600;
-  letter-spacing: -4px;
-  background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #6366f1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1;
-}
-
-.search-wrap { position: relative; width: 100%; max-width: 520px; }
-
-#main-search {
-  width: 100%;
-  padding: 15px 50px 15px 22px;
-  border-radius: 100px;
-  border: 1.5px solid var(--border);
-  font-size: 15px;
-  font-family: var(--font);
-  color: var(--text);
-  outline: none;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-#main-search:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
-}
-
-.search-icon-btn {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--muted);
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  transition: color 0.15s;
-}
-.search-icon-btn:hover { color: var(--accent); }
-
-.main-btns { display: flex; gap: 10px; }
-.main-btns button {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  padding: 9px 18px;
-  font-size: 13.5px;
-  font-family: var(--font);
-  color: var(--muted);
-  font-weight: 500;
-  cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
-}
-.main-btns button:hover { border-color: var(--accent); color: var(--accent); }
-
-#site-footer {
-  padding: 16px 32px;
-  border-top: 1px solid var(--border);
-  font-size: 12px;
-  color: var(--muted);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  background: var(--surface);
-}
-#site-footer a { color: var(--muted); text-decoration: none; margin: 0 10px; }
-#site-footer a:hover { color: var(--text); }
-
-#screen-setup {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg);
-  padding: 40px 20px;
-}
-
-.setup-card {
-  background: var(--surface);
-  border-radius: 20px;
-  padding: 44px 48px;
-  box-shadow: var(--shadow-lg);
-  width: 100%;
-  max-width: 400px;
-  border: 1px solid var(--border);
-}
-
-.setup-logo-sm {
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -1.2px;
-  background: linear-gradient(135deg, #2563eb, #6366f1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  display: block;
-  margin-bottom: 8px;
-}
-
-.setup-card h2 { font-size: 20px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
-.setup-card > p { font-size: 13.5px; color: var(--muted); margin-bottom: 30px; }
-
-.setup-field { margin-bottom: 18px; }
-.setup-field label {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--muted);
-  margin-bottom: 7px;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-}
-.setup-field input {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1.5px solid var(--border);
-  font-size: 14.5px;
-  font-family: var(--font);
-  color: var(--text);
-  outline: none;
-  background: var(--bg);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.setup-field input:focus {
-  border-color: var(--accent);
-  background: var(--surface);
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
-}
-
-.setup-btn {
-  width: 100%;
-  padding: 13px;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-size: 14.5px;
-  font-weight: 600;
-  font-family: var(--font);
-  cursor: pointer;
-  margin-top: 6px;
-  transition: opacity 0.15s, transform 0.1s;
-  letter-spacing: 0.01em;
-}
-.setup-btn:hover { opacity: 0.90; }
-.setup-btn:active { transform: scale(0.98); }
-
-#screen-chat {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background: var(--bg);
-  position: relative;
-}
-
-#chat-topbar {
-  display: flex;
-  align-items: center;
-  padding: 0 18px;
-  height: 54px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  background: var(--surface);
-  gap: 12px;
-}
-
-.chat-logo {
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: -1px;
-  background: linear-gradient(135deg, #2563eb, #6366f1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-#chat-room-label {
-  font-size: 13px;
-  color: var(--muted);
-  font-weight: 500;
-  font-family: var(--font-mono);
-  background: var(--bg);
-  padding: 3px 10px;
-  border-radius: 100px;
-  border: 1px solid var(--border);
-}
-
-.room-info-right {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 12.5px;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.online-dot {
-  width: 7px;
-  height: 7px;
-  background: #22c55e;
-  border-radius: 50%;
-  flex-shrink: 0;
-  animation: pulse 2.2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.3); }
-  50% { box-shadow: 0 0 0 4px rgba(34,197,94,0.08); }
-}
-
-#messages-area {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px 16px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  scroll-behavior: smooth;
-}
-
-#messages-area::-webkit-scrollbar { width: 3px; }
-#messages-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-.sys-msg {
-  text-align: center;
-  font-size: 11.5px;
-  color: var(--muted);
-  padding: 8px 0;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-}
-
-.bubble-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 7px;
-  max-width: 68%;
-  animation: msgIn 0.16s ease;
-}
-
-@keyframes msgIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.bubble-row.mine { align-self: flex-end; flex-direction: row-reverse; }
-.bubble-row.theirs { align-self: flex-start; }
-
-.bubble-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--muted);
-  flex-shrink: 0;
-  letter-spacing: -0.5px;
-}
-
-.bubble-content { display: flex; flex-direction: column; gap: 2px; }
-.bubble-row.mine .bubble-content { align-items: flex-end; }
-.bubble-row.theirs .bubble-content { align-items: flex-start; }
-
-.bubble-sender {
-  font-size: 11px;
-  color: var(--muted);
-  padding: 0 5px;
-  margin-bottom: 1px;
-  font-weight: 500;
-}
-
-.bubble {
-  padding: 9px 14px;
-  border-radius: var(--radius-msg);
-  font-size: 14px;
-  line-height: 1.5;
-  word-break: break-word;
-  position: relative;
-  cursor: default;
-  letter-spacing: 0.01em;
-}
-
-.bubble.mine {
-  background: var(--bubble-out);
-  color: #fff;
-  border-bottom-right-radius: 4px;
-}
-
-.bubble.theirs {
-  background: var(--bubble-in);
-  color: var(--text);
-  border-bottom-left-radius: 4px;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-}
-
-.bubble-actions {
-  display: none;
-  position: absolute;
-  top: -34px;
-  background: var(--surface);
-  border-radius: 100px;
-  box-shadow: var(--shadow-lg);
-  padding: 4px 6px;
-  gap: 1px;
-  z-index: 10;
-  border: 1px solid var(--border);
-}
-
-.bubble-row.mine .bubble-actions { right: 0; }
-.bubble-row.theirs .bubble-actions { left: 0; }
-.bubble:hover .bubble-actions { display: flex; }
-
-.bubble-actions button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 13px;
-  padding: 5px 8px;
-  border-radius: 100px;
-  transition: background 0.1s;
-  color: var(--muted);
-  display: flex;
-  align-items: center;
-}
-.bubble-actions button:hover { background: var(--bg); color: var(--accent); }
-
-.bubble-img {
-  max-width: 200px;
-  border-radius: 12px;
-  display: block;
-  cursor: pointer;
-}
-
-.bubble-time {
-  font-size: 10px;
-  color: rgba(255,255,255,0.55);
-  padding: 0 2px;
-  align-self: flex-end;
-  margin-top: 1px;
-  font-family: var(--font-mono);
-}
-.bubble-row.theirs .bubble-time { color: var(--muted); }
-
-.bubble-edit-input {
-  background: rgba(255,255,255,0.18);
-  border: 1px solid rgba(255,255,255,0.38);
-  border-radius: 8px;
-  padding: 3px 9px;
-  color: #fff;
-  font-family: var(--font);
-  font-size: 14px;
-  outline: none;
-  min-width: 100px;
-  max-width: 240px;
-}
-
-#cmd-popup {
-  position: absolute;
-  bottom: 66px;
-  left: 58px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: var(--shadow-lg);
-  width: 230px;
-  overflow: hidden;
-  z-index: 100;
-  animation: fadeUp 0.14s ease;
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(5px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.cmd-item {
-  padding: 10px 14px;
-  font-size: 13px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text);
-  transition: background 0.1s;
-  border-bottom: 1px solid var(--border);
-}
-.cmd-item:last-child { border-bottom: none; }
-.cmd-item:hover, .cmd-item.selected { background: var(--accent-soft); }
-.cmd-name { font-weight: 600; flex-shrink: 0; color: var(--accent); font-family: var(--font-mono); font-size: 12.5px; }
-.cmd-desc { color: var(--muted); font-size: 11.5px; }
-
-#input-bar {
-  display: flex;
-  align-items: center;
-  padding: 10px 14px;
-  border-top: 1px solid var(--border);
-  gap: 8px;
-  background: var(--surface);
-  position: relative;
-  flex-shrink: 0;
-}
-
-.action-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  flex-shrink: 0;
-  transition: background 0.15s, color 0.15s;
-}
-.action-btn:hover { background: var(--bg); color: var(--text); }
-
-#file-input { display: none; }
-
-#msg-input {
-  flex: 1;
-  padding: 9px 16px;
-  border-radius: 100px;
-  border: 1.5px solid var(--border);
-  font-size: 14px;
-  font-family: var(--font);
-  color: var(--text);
-  outline: none;
-  background: var(--bg);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-#msg-input:focus {
-  border-color: var(--accent);
-  background: var(--surface);
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.09);
-}
-
-#send-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
-  background: var(--accent);
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: opacity 0.15s, transform 0.1s;
-}
-#send-btn:hover { opacity: 0.88; }
-#send-btn:active { transform: scale(0.90); }
-
-#emoji-picker {
-  position: absolute;
-  bottom: 60px;
-  left: 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: var(--shadow-lg);
-  z-index: 100;
-  animation: fadeUp 0.14s ease;
-  width: 300px;
-  overflow: hidden;
-}
-.emoji-grid {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 2px;
-  padding: 8px;
-  max-height: 240px;
-  overflow-y: auto;
-}
-.emoji-grid::-webkit-scrollbar { width: 3px; }
-.emoji-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-.emoji-grid span {
-  font-size: 20px;
-  cursor: pointer;
-  padding: 4px;
-  text-align: center;
-  border-radius: 6px;
-  transition: background 0.1s, transform 0.1s;
-  line-height: 1.3;
-}
-.emoji-grid span:hover { background: var(--bg); transform: scale(1.2); }
-
-#lightbox {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.88);
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: zoom-out;
-}
-#lightbox img {
-  max-width: 92vw;
-  max-height: 92vh;
-  border-radius: 10px;
-  object-fit: contain;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
-  cursor: default;
-}
-
-#new-msg-badge {
-  position: absolute;
-  bottom: 68px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--accent);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 100px;
-  cursor: pointer;
-  z-index: 50;
-  box-shadow: var(--shadow-lg);
-  white-space: nowrap;
-  letter-spacing: 0.01em;
-  animation: fadeUp 0.2s ease;
-}
-#new-msg-badge:hover { opacity: 0.88; }
-
-#emergency-panel {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: fadeInBg 0.2s ease;
-}
-@keyframes fadeInBg { from{opacity:0} to{opacity:1} }
-
-.emergency-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 36px 40px;
-  max-width: 360px;
-  width: 90%;
-  text-align: center;
-  box-shadow: var(--shadow-lg);
-  animation: slideUp 0.22s cubic-bezier(0.34,1.56,0.64,1);
-}
-@keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
-
-.e-badge {
-  display: inline-block;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 100px;
-  padding: 3px 12px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--muted);
-  letter-spacing: 0.5px;
-  margin-bottom: 14px;
-  text-transform: uppercase;
-  font-family: var(--font-mono);
-}
-.e-title { font-size: 19px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
-.e-desc { font-size: 13.5px; color: var(--muted); line-height: 1.65; margin-bottom: 26px; }
-.e-desc strong { color: var(--text); }
-
-.emergency-btns { display: flex; gap: 10px; justify-content: center; }
-.e-btn-accept {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 11px 26px;
-  font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: var(--font);
-  transition: opacity 0.15s, transform 0.1s;
-}
-.e-btn-accept:hover { opacity: 0.88; }
-.e-btn-accept:active { transform: scale(0.97); }
-
-.e-btn-reject {
-  background: var(--bg);
-  color: var(--muted);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  padding: 11px 26px;
-  font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: var(--font);
-  transition: border-color 0.15s, color 0.15s;
-}
-.e-btn-reject:hover { border-color: var(--text); color: var(--text); }
-
-#screen-disguise { min-height: 100vh; background: var(--surface); }
-
-.d-topbar {
-  display: flex;
-  align-items: center;
-  padding: 10px 24px;
-  border-bottom: 1px solid var(--border);
-  gap: 20px;
-  background: var(--surface);
-}
-
-.d-logo {
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -1.5px;
-  background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #6366f1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.d-search-row {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  max-width: 560px;
-  border: 1.5px solid var(--border);
-  border-radius: 100px;
-  overflow: hidden;
-  background: var(--bg);
-}
-
-.d-search-box {
-  flex: 1;
-  padding: 9px 18px;
-  border: none;
-  font-size: 14.5px;
-  font-family: var(--font);
-  outline: none;
-  color: var(--text);
-  background: transparent;
-}
-
-.d-search-btn {
-  padding: 9px 18px;
-  background: var(--surface);
-  color: var(--muted);
-  border: none;
-  border-left: 1px solid var(--border);
-  cursor: pointer;
-  font-size: 14px;
-  font-family: var(--font);
-  font-weight: 500;
-  transition: background 0.15s;
-}
-.d-search-btn:hover { background: var(--bg); }
-
-.d-tabs {
-  display: flex;
-  padding: 0 24px;
-  gap: 2px;
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-  background: var(--surface);
-}
-
-.d-tab {
-  padding: 10px 14px;
-  font-size: 13px;
-  color: var(--muted);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: color 0.15s;
-  white-space: nowrap;
-  font-weight: 500;
-}
-.d-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-.d-body {
-  display: flex;
-  padding: 22px 24px;
-  gap: 32px;
-  max-width: 960px;
-}
-
-.d-results { flex: 1; min-width: 0; }
-.d-stat { font-size: 12.5px; color: var(--muted); margin-bottom: 20px; }
-.d-result-item { margin-bottom: 26px; }
-.d-result-url { font-size: 12px; color: #3c4043; margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
-.d-favicon { width: 14px; height: 14px; background: var(--border); border-radius: 2px; }
-.d-result-url span { color: var(--muted); }
-.d-result-title { font-size: 17px; color: #1a0dab; cursor: pointer; margin-bottom: 4px; font-weight: 400; }
-.d-result-title:hover { text-decoration: underline; }
-.d-result-desc { font-size: 13.5px; color: #4d5156; line-height: 1.55; }
-
-.d-sidebar { width: 280px; flex-shrink: 0; }
-.d-card {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
-  font-size: 13.5px;
-  color: var(--muted);
-  line-height: 1.75;
-}
-.d-card-title { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-.d-card-sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
-.d-divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
-
-/* 검 강화하기 미니게임 스타일 */
-.game-container {
-  background: #1e1e24;
-  color: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  width: 100%;
-  max-width: 320px;
-  margin: 10px 0;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid #3a3a42;
-  text-align: center;
-}
-.game-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #ffd700; }
-.sword-display { font-size: 28px; margin: 15px 0; font-weight: bold; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
-.game-info { font-size: 13px; color: #ccc; margin-bottom: 15px; line-height: 1.5; }
-.game-btns-row { display: flex; gap: 8px; justify-content: center; }
-.game-btn {
-  background: #2563eb;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.game-btn:hover { background: #1d4ed8; }
-.game-btn.reset { background: #ef4444; }
-.game-btn.reset:hover { background: #dc2626; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#fff;color:#111;padding:2.5rem 1.5rem;font-size:14px;line-height:1.6}
+.wrap{max-width:480px;margin:0 auto}
+
+h1{font-size:18px;font-weight:600;margin-bottom:1.8rem;color:#111}
+
+.section{margin-bottom:1.4rem}
+.label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#999;margin-bottom:8px;display:block}
+
+/* model select */
+.mlist{display:flex;flex-direction:column;gap:4px}
+.mbtn{width:100%;padding:9px 12px;border:1px solid #e5e5e5;border-radius:8px;background:#fff;text-align:left;font-family:inherit;font-size:13px;cursor:pointer;color:#444;transition:border-color .12s,background .12s;display:flex;justify-content:space-between;align-items:center}
+.mbtn:hover{border-color:#bbb}
+.mbtn.sel{border-color:#1a6ef5;background:#f0f6ff;color:#111;font-weight:500}
+.mbtn .tag{font-size:11px;color:#999;font-weight:400}
+.mbtn.sel .tag{color:#1a6ef5}
+
+/* style select */
+.slist{display:flex;gap:6px;flex-wrap:wrap}
+.sbtn{padding:6px 12px;border:1px solid #e5e5e5;border-radius:20px;background:#fff;font-family:inherit;font-size:12px;cursor:pointer;color:#444;transition:all .12s}
+.sbtn:hover{border-color:#bbb}
+.sbtn.sel{border-color:#1a6ef5;background:#1a6ef5;color:#fff}
+
+/* key input */
+.krow{display:flex;gap:6px}
+.kinput{flex:1;padding:9px 11px;border:1px solid #e5e5e5;border-radius:8px;font-size:13px;font-family:'DM Mono',monospace;color:#111;background:#fff;outline:none;transition:border-color .12s}
+.kinput:focus{border-color:#1a6ef5}
+.kinput.ok{border-color:#22c55e;background:#f0fdf4}
+
+/* generate button */
+.genbtn{width:100%;padding:11px;background:#111;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .12s;margin-top:.4rem}
+.genbtn:hover{background:#333}
+
+/* result */
+.result{margin-top:1.2rem;display:none}
+.rrow{display:flex;justify-content:center;margin-top:8px}
+.rbtn.blue{width:100%;padding:12px;background:#1a6ef5;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .12s}
+.rbtn.blue:hover{background:#1558c0}
+
+.err{font-size:12px;color:#dc2626;margin-top:6px;display:none}
+
+/* toast */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(4px);background:#111;color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;opacity:0;transition:opacity .18s,transform .18s;pointer-events:none;z-index:9999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* footer copyright */
+.footer{margin-top:2.5rem;text-align:center;font-size:11px;color:#aaa;letter-spacing:.02em}
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<div id="toast"></div>
+<h1>Axion</h1>
 
-<div id="screen-main-wrap">
-  <nav id="top-nav">
-    <a>메일</a><a>카페</a><a>블로그</a><a>뉴스</a><a>지도</a><a>쇼핑</a>
-    <button class="nav-login">로그인</button>
-  </nav>
-
-  <div id="screen-main">
-    <div class="axion-logo">Axion</div>
-    <div class="search-wrap">
-      <input id="main-search" type="text" placeholder="검색어를 입력하세요"
-        autocomplete="off" autocorrect="off" spellcheck="false">
-      <button class="search-icon-btn" onclick="doMainSearch()">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-          <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-      </button>
-    </div>
-    <div class="main-btns">
-      <button onclick="doMainSearch()">Axion 검색</button>
-    </div>
-  </div>
-
-  <footer id="site-footer">
-    <div>
-      <a>광고</a><a>비즈니스</a><a>개인정보처리방침</a><a>이용약관</a><a>도움말</a>
-    </div>
-    <div>대한민국</div>
-    <div>© 2025 Axion LLC</div>
-  </footer>
+<!-- 모델 -->
+<div class="section">
+  <span class="label">모델</span>
+  <div class="mlist" id="mg"></div>
 </div>
 
-<div id="screen-setup" class="hidden">
-  <div class="setup-card">
-    <span class="setup-logo-sm">Axion</span>
-    <h2>채널 접속</h2>
-    <p>닉네임과 채널 번호를 입력하고 접속하세요</p>
-    <div class="setup-field">
-      <label>닉네임</label>
-      <input id="setup-nick" type="text" placeholder="예: alpha_user"
-        autocomplete="off" autocorrect="off" spellcheck="false" maxlength="20">
-    </div>
-    <div class="setup-field">
-      <label>채널 번호</label>
-      <input id="setup-room" type="text" placeholder="예: 7734"
-        autocomplete="off" autocorrect="off" spellcheck="false" maxlength="12">
-    </div>
-    <button class="setup-btn" onclick="joinChat()">접속하기 →</button>
+<!-- 답변 스타일 -->
+<div class="section">
+  <span class="label">답변 스타일</span>
+  <div class="slist" id="sl"></div>
+</div>
+
+<!-- API 키 -->
+<div class="section">
+  <span class="label" id="klabel">API 키</span>
+  <div class="krow">
+    <input class="kinput" type="password" id="ki" autocomplete="off" spellcheck="false" placeholder="AIzaSy...">
+  </div>
+  <div class="err" id="em"></div>
+</div>
+
+<button class="genbtn" onclick="generate()">북마클릿 생성</button>
+
+<div class="result" id="result">
+  <div class="rrow">
+    <button class="rbtn blue" onclick="doCopy()">북마클릿 코드 복사하기</button>
   </div>
 </div>
 
-<div id="screen-chat" class="hidden">
-  <div id="chat-topbar">
-    <span class="chat-logo">Axion</span>
-    <span id="chat-room-label"># 채널</span>
-    <div class="room-info-right">
-      <span class="online-dot"></span>
-      <span id="user-count">1명 접속 중</span>
-    </div>
-  </div>
-
-  <div id="messages-area"></div>
-
-  <div id="new-msg-badge" class="hidden"></div>
-  <div id="cmd-popup" class="hidden"></div>
-  <div id="emoji-picker" class="hidden"></div>
-
-  <div id="input-bar">
-    <button id="emoji-btn" class="action-btn" title="이모지">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/>
-        <circle cx="9" cy="9.5" r="0.7" fill="currentColor" stroke="none"/>
-        <circle cx="15" cy="9.5" r="0.7" fill="currentColor" stroke="none"/>
-        <path d="M8 14.5s1.5 2 4 2 4-2 4-2"/>
-      </svg>
-    </button>
-    <button id="file-btn" class="action-btn" title="파일 첨부">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-      </svg>
-    </button>
-    <input type="file" id="file-input" accept="image/*,.pdf,.txt">
-    <input id="msg-input" type="text" placeholder="메시지 입력... (/ 명령어, @ 멘션)"
-      autocomplete="off" autocorrect="off" spellcheck="false">
-    <button id="send-btn" onclick="sendMessage()">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-      </svg>
-    </button>
-  </div>
+<!-- 카피라이트 -->
+<div class="footer">
+  &copy; 시형
 </div>
 
-<div id="emergency-panel" class="hidden">
-  <div class="emergency-card">
-    <div class="e-badge">비상 프로토콜</div>
-    <div class="e-title">채널 초기화</div>
-    <div class="e-desc">
-      모든 사용자를 기본 화면으로 이동하고<br>채팅 내역을 삭제합니다.<br><br>
-      <strong>이 작업은 되돌릴 수 없습니다.</strong>
-    </div>
-    <div class="emergency-btns">
-      <button class="e-btn-accept" onclick="acceptEmergency()">실행</button>
-      <button class="e-btn-reject" onclick="rejectEmergency()">취소</button>
-    </div>
-  </div>
 </div>
-
-<div id="screen-disguise" class="hidden">
-  <div class="d-topbar">
-    <span class="d-logo" id="d-logo-back" title="채팅으로 돌아가기">Axion</span>
-    <div class="d-search-row">
-      <input class="d-search-box" type="text" value="Axion 검색엔진"
-        autocomplete="off" autocorrect="off" spellcheck="false">
-      <button class="d-search-btn">검색</button>
-    </div>
-  </div>
-  <div class="d-tabs">
-    <span class="d-tab active">전체</span>
-    <span class="d-tab">뉴스</span>
-    <span class="d-tab">이미지</span>
-    <span class="d-tab">동영상</span>
-    <span class="d-tab">지도</span>
-    <span class="d-tab">쇼핑</span>
-    <span class="d-tab">도서</span>
-  </div>
-  <div class="d-body">
-    <div class="d-results">
-      <p class="d-stat">약 1,240,000,000개의 결과 (0.32초)</p>
-      <div class="d-result-item">
-        <div class="d-result-url"><div class="d-favicon"></div> axion.com › <span>about</span></div>
-        <div class="d-result-title">Axion — 더 스마트한 검색의 시작 | 공식 홈페이지</div>
-        <div class="d-result-desc">Axion은 AI 기반 차세대 검색 엔진으로, 사용자의 의도를 실시간으로 파악하여 최적화된 결과를 제공합니다. 광고 없는 순수 검색 경험. 개인정보 보호 최우선.</div>
-      </div>
-      <div class="d-result-item">
-        <div class="d-result-url"><div class="d-favicon"></div> namu.wiki › <span>Axion 검색엔진</span></div>
-        <div class="d-result-title">Axion 검색엔진 - 나무위키</div>
-        <div class="d-result-desc">Axion은 2019년 설립된 미국 실리콘밸리 소재의 검색 기술 기업으로, 자체 개발한 SemanticRank™ 알고리즘을 통해 문맥 기반 검색 결과를 제공한다.</div>
-      </div>
-    </div>
-    <div class="d-sidebar">
-      <div class="d-card">
-        <div class="d-card-title">Axion Inc.</div>
-        <div class="d-card-sub">검색 기술 기업</div>
-        <hr class="d-divider">
-        🏢 캘리포니아주 마운틴뷰, 미국<br>
-        📅 설립: 2019년 3월<br>
-        👥 직원 수: 약 1,200명<br>
-        💰 기업가치: $3.8B (2024 Series C)<br>
-        🌐 사용자: 4,700만 MAU
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="lightbox" class="hidden" onclick="closeLightbox()">
-  <img id="lightbox-img" src="" alt="확대 이미지">
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
-'use strict';
-let myNick = '';
-let roomId = '';
-let mqttClient = null;
-let baseTopic = '';
-let onlineUsers = new Set();
-let messages = {};
-let mentionEnabled = true;
-let myClientId = '';
-
-// CMDS 배열에 /game 추가
-const CMDS = [
-  { name: '/clear', desc: '화면 지우기' },
-  { name: '/도움말', desc: '명령어 목록' },
-  { name: '/닉네임', desc: '닉네임 확인' },
-  { name: '/방번호', desc: '채널 번호 확인' },
-  { name: '/멘션', desc: 'on / off' },
-  { name: '/game', desc: '검 강화하기 게임 실행' }
+var MODELS = [
+  {id:"gemini-2.0-flash",      name:"Gemini 2.0 Flash",      tag:"무료 1500/일", prov:"gemini"},
+  {id:"gemini-2.5-flash-lite", name:"Gemini 2.5 Flash-Lite", tag:"무료 1000/일", prov:"gemini"},
+  {id:"gemini-2.5-flash",      name:"Gemini 2.5 Flash",      tag:"무료 250/일",  prov:"gemini"},
+  {id:"gemini-2.5-pro",        name:"Gemini 2.5 Pro",        tag:"무료 100/일",  prov:"gemini"},
+  {id:"gpt-4o-mini",           name:"GPT-4o mini",           tag:"유료",         prov:"openai"},
+  {id:"gpt-4o",                name:"GPT-4o",                tag:"유료",         prov:"openai"},
+  {id:"gpt-4.1-mini",          name:"GPT-4.1 mini",          tag:"유료",         prov:"openai"},
+  {id:"gpt-4.1",               name:"GPT-4.1",               tag:"유료",         prov:"openai"},
 ];
 
-let popupFiltered = [];
-let popupSelectedIdx = -1;
-let popupMode = null;
-
-document.addEventListener('DOMContentLoaded', () => {
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
-  }
-});
-
-const ALL_EMOJIS = [
-  '😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','🥰','😘',
-  '😗','🙂','🤗','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖',
-  '😫','😩','🥺','😢','😭','😤','😠','😡','🤬','😱','😨','😰','😥','😓','🤔',
-  '🤭','🤫','🤥','😐','😑','😬','🙄','😯','😲','🥱','😴','🤤','😷','🤒','🤕',
-  '🤢','🤮','🥴','😵','🤯','🥵','🥶','😶','🫠','🫡','🥹',
-  '👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙',
-  '👈','👉','👆','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','🙏',
-  '✍️','💪','🦾','💅','🤳','👐','🤲',
-  '✨','🔥','💥','❄️','🌊','💨','🌈','⭐','🌟','💫','🌙','☀️','⚡','💧',
-  '🎆','🎇','🧨','🎉','🎊','🎈','💯','💢','❤️','🧡','💛','💚','💙','💜',
-  '🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💬','💭','💤',
+var STYLES = [
+  {id:"quick",    label:"답만",      sys:"문제의 최종 답만 한 줄로 말해줘. 풀이 과정 없이 답만."},
+  {id:"simple",   label:"간단 풀이", sys:"문제를 풀어줘. 핵심 풀이 과정과 답을 간결하게 설명해줘."},
+  {id:"detailed", label:"자세한 풀이",sys:"문제를 풀어줘. 풀이 과정을 단계별로 자세하게 설명하고 최종 답을 명확히 제시해줘."},
 ];
-const emojiPicker = document.getElementById('emoji-picker');
 
-function buildEmojiPicker() {
-  emojiPicker.innerHTML = '';
-  const grid = document.createElement('div');
-  grid.className = 'emoji-grid';
-  ALL_EMOJIS.forEach(em => {
-    const span = document.createElement('span');
-    span.textContent = em;
-    span.onclick = () => {
-      const inp = document.getElementById('msg-input');
-      inp.value += em;
-      inp.focus();
-      emojiPicker.classList.add('hidden');
-    };
-    grid.appendChild(span);
+var selModel = "gemini-2.0-flash";
+var selStyle = "simple";
+var savedKeys = {};
+var currentGeneratedBm = "";
+
+try {
+  var raw = localStorage.getItem("ai_bm_keys");
+  if (raw) savedKeys = JSON.parse(raw);
+} catch(e) {}
+
+function saveKeys() {
+  try { localStorage.setItem("ai_bm_keys", JSON.stringify(savedKeys)); } catch(e) {}
+}
+
+function gm(id){ return MODELS.find(function(m){return m.id===id;}); }
+
+function renderModels(){
+  var g = document.getElementById("mg"); g.innerHTML = "";
+  MODELS.forEach(function(m){
+    var b = document.createElement("button");
+    b.className = "mbtn" + (m.id===selModel?" sel":"");
+    b.innerHTML = m.name + "<span class=\"tag\">" + m.tag + "</span>";
+    b.onclick = function(){ pickModel(m.id); };
+    g.appendChild(b);
   });
-  emojiPicker.appendChild(grid);
 }
 
-buildEmojiPicker();
-document.getElementById('emoji-btn').onclick = () => {
-  emojiPicker.classList.toggle('hidden');
-};
-
-function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-function timeStr() {
-  const d = new Date();
-  return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
-}
-function showToast(msg, dur = 2600) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), dur);
-}
-let newMsgCount = 0;
-
-function isNearBottom() {
-  const a = document.getElementById('messages-area');
-  return a.scrollHeight - a.scrollTop - a.clientHeight < 80;
+function renderStyles(){
+  var s = document.getElementById("sl"); s.innerHTML = "";
+  STYLES.forEach(function(st){
+    var b = document.createElement("button");
+    b.className = "sbtn" + (st.id===selStyle?" sel":"");
+    b.textContent = st.label;
+    b.onclick = function(){ selStyle=st.id; renderStyles(); };
+    s.appendChild(b);
+  });
 }
 
-function scrollBottom() {
-  const a = document.getElementById('messages-area');
-  a.scrollTop = a.scrollHeight;
-  newMsgCount = 0;
-  document.getElementById('new-msg-badge').classList.add('hidden');
+function pickModel(id){
+  var cur = document.getElementById("ki").value.trim();
+  if(cur) { savedKeys[selModel]=cur; saveKeys(); }
+  selModel = id;
+  renderModels();
+  var m = gm(id);
+  document.getElementById("klabel").textContent = m.prov==="gemini" ? "Gemini API 키" : "OpenAI API 키";
+  document.getElementById("ki").placeholder = m.prov==="gemini" ? "AIzaSy..." : "sk-proj-...";
+  var inp = document.getElementById("ki");
+  inp.value = savedKeys[id] || "";
+  updateKS();
+  document.getElementById("result").style.display = "none";
+  document.getElementById("em").style.display = "none";
 }
 
-function smartScroll() {
-  if (isNearBottom()) {
-    scrollBottom();
+function updateKS(){
+  var i = document.getElementById("ki");
+  if(i.value.trim()) i.classList.add("ok"); else i.classList.remove("ok");
+}
+
+function showToast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove("show");},2000);
+}
+
+function doCopy(){
+  if(!currentGeneratedBm) return;
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(currentGeneratedBm).then(function(){showToast("코드가 복사되었습니다.");});
   } else {
-    newMsgCount++;
-    const badge = document.getElementById('new-msg-badge');
-    badge.textContent = '새 메시지 ' + newMsgCount + '개 ↓';
-    badge.classList.remove('hidden');
+    var t = document.createElement("textarea");
+    t.value = currentGeneratedBm; document.body.appendChild(t); t.select();
+    document.execCommand("copy"); document.body.removeChild(t);
+    showToast("코드가 복사되었습니다.");
   }
 }
 
-document.getElementById('messages-area').addEventListener('scroll', () => {
-  if (isNearBottom()) {
-    newMsgCount = 0;
-    document.getElementById('new-msg-badge').classList.add('hidden');
-  }
-});
-document.getElementById('new-msg-badge').addEventListener('click', () => scrollBottom());
-
-function showScreen(id) {
-  ['screen-main-wrap','screen-setup','screen-chat','screen-disguise'].forEach(s => {
-    const el = document.getElementById(s);
-    if (el) el.classList.add('hidden');
-  });
-  if (id) document.getElementById(id).classList.remove('hidden');
-}
-
-document.getElementById('main-search').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doMainSearch();
-});
-function doMainSearch() {
-  const q = document.getElementById('main-search').value.trim();
-  if (!q) return;
-  if (q === '1112') {
-    showScreen('screen-setup');
-    setTimeout(() => document.getElementById('setup-nick').focus(), 80);
-  } else if (q === '14353376') {
-    document.getElementById('emergency-panel').classList.remove('hidden');
-  } else {
-    window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(q);
-  }
-}
-
-document.getElementById('setup-nick').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('setup-room').focus();
-});
-document.getElementById('setup-room').addEventListener('keydown', e => {
-  if (e.key === 'Enter') joinChat();
-});
-const BANNED_CHARS = ['신', '순', '자'];
-
-function joinChat() {
-  const nick = document.getElementById('setup-nick').value.trim();
-  const room = document.getElementById('setup-room').value.trim();
-  if (!nick || nick.length < 2) { showToast('닉네임은 최소 2자 이상이어야 합니다'); return; }
-  const banned = BANNED_CHARS.find(c => nick.includes(c));
-  if (banned) { showToast('검열된 닉네임입니다. 사용할 수 없습니다.'); return; }
-  if (!room) { showToast('채널 번호를 입력하세요'); return; }
-  myNick = nick;
-  roomId = room;
-  baseTopic = 'axion_secure/room/' + room;
-  myClientId = 'axion_' + nick + '_' + genId();
-  document.getElementById('chat-room-label').textContent = '# ' + room;
-  showScreen('screen-chat');
-  connectMQTT();
-}
-
-function publish(sub, data) {
-  if (!mqttClient || !mqttClient.connected) return;
-  try { mqttClient.publish(baseTopic + '/' + sub, JSON.stringify(data), { qos: 1 }); } catch(e) {}
-}
-
-function connectMQTT() {
-  addSys('연결 중...');
-  try {
-    mqttClient = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
-      clientId: myClientId, clean: true, reconnectPeriod: 5000, connectTimeout: 8000
-    });
-  } catch(e) {
-    addSys('오프라인 모드');
-    return;
-  }
-  mqttClient.on('connect', () => {
-    mqttClient.subscribe(baseTopic + '/#', { qos: 1 });
-    publish('join', { nick: myNick, clientId: myClientId });
-    addSys('채널 ' + roomId + ' 접속됨');
-    setTimeout(checkDuplicateNick, 2200);
-    updateCount();
-  });
-  mqttClient.on('message', (topic, payload) => {
-    let data;
-    try { data = JSON.parse(payload.toString()); } catch { return; }
-    const sub = topic.slice((baseTopic + '/').length);
-    handleMsg(sub, data);
-  });
-  mqttClient.on('error', () => addSys('연결 오류'));
-  mqttClient.on('reconnect', () => addSys('재연결 중...'));
-  mqttClient.on('close', () => addSys('연결 종료'));
-  window.addEventListener('beforeunload', () => {
-    if (mqttClient && mqttClient.connected) {
-      publish('leave', { nick: myNick });
-      mqttClient.end(true);
-    }
-  });
-}
-
-function handleMsg(sub, data) {
-  switch(sub) {
-    case 'emergency':
-      if (data.action === 'reset') {
-        document.getElementById('emergency-panel').classList.add('hidden');
-        doEmergencyReset();
-      }
-      break;
-    case 'join':
-      if (data.nick === myNick) return;
-      onlineUsers.add(data.nick);
-      updateCount();
-      addSys(data.nick + ' 님이 입장했습니다');
-      publish('presence', { nick: myNick, clientId: myClientId });
-      break;
-    case 'presence':
-      if (data.nick === myNick) {
-        if (data.clientId !== myClientId) {
-          showToast('중복 닉네임 감지! 다른 닉네임을 사용하세요.');
-          if (mqttClient) { mqttClient.end(true); mqttClient = null; }
-          onlineUsers = new Set();
-          messages = {};
-          setTimeout(() => showScreen('screen-setup'), 2000);
-        }
-        return;
-      }
-      onlineUsers.add(data.nick);
-      updateCount();
-      break;
-    case 'leave':
-      onlineUsers.delete(data.nick);
-      updateCount();
-      addSys(data.nick + ' 님이 퇴장했습니다');
-      break;
-    case 'msg':
-      if (data.sender === myNick) return;
-      renderBubble(data, false);
-      if (mentionEnabled && data.text && data.text.includes('@' + myNick)) {
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('Axion #' + roomId, { body: data.sender + ': ' + data.text });
-        }
-      }
-      break;
-    case 'edit':
-      if (!messages[data.id]) return;
-      messages[data.id].text = data.text;
-      const tEl = messages[data.id].bubble.querySelector('.bubble-text');
-      if (tEl) tEl.textContent = data.text;
-      break;
-    case 'delete':
-      if (!messages[data.id]) return;
-      messages[data.id].row.remove();
-      delete messages[data.id];
-      break;
-  }
-}
-
-function checkDuplicateNick() {
-  if (onlineUsers.has(myNick)) {
-    showToast('중복 닉네임 감지! 접속이 차단됩니다.');
-    if (mqttClient) { mqttClient.end(true); mqttClient = null; }
-    onlineUsers = new Set(); messages = {};
-    setTimeout(() => showScreen('screen-setup'), 2200);
-  }
-}
-
-function updateCount() {
-  document.getElementById('user-count').textContent = (onlineUsers.size + 1) + '명 접속 중';
-}
-
-function addSys(text) {
-  const div = document.createElement('div');
-  div.className = 'sys-msg';
-  div.textContent = text;
-  document.getElementById('messages-area').appendChild(div);
-  scrollBottom();
-}
-
-function renderBubble(data, isMine) {
-  const area = document.getElementById('messages-area');
-  const row = document.createElement('div');
-  row.className = 'bubble-row ' + (isMine ? 'mine' : 'theirs');
-
-  const av = document.createElement('div');
-  av.className = 'bubble-avatar';
-  av.textContent = data.sender.charAt(0).toUpperCase();
-  av.title = data.sender;
-
-  const content = document.createElement('div');
-  content.className = 'bubble-content';
-
-  if (!isMine) {
-    const sn = document.createElement('div');
-    sn.className = 'bubble-sender';
-    sn.textContent = data.sender;
-    content.appendChild(sn);
-  }
-
-  const bubble = document.createElement('div');
-  bubble.className = 'bubble ' + (isMine ? 'mine' : 'theirs');
-
-  if (isMine) {
-    const acts = document.createElement('div');
-    acts.className = 'bubble-actions';
-
-    const editBtn = document.createElement('button');
-    editBtn.title = '수정';
-    editBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
-    editBtn.onclick = (e) => { e.stopPropagation(); editBubble(data.id); };
-
-    const delBtn = document.createElement('button');
-    delBtn.title = '삭제';
-    delBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
-    delBtn.onclick = (e) => { e.stopPropagation(); deleteBubble(data.id); };
-
-    acts.appendChild(editBtn);
-    acts.appendChild(delBtn);
-    bubble.appendChild(acts);
-  }
-
-  if (data.type === 'image') {
-    const img = document.createElement('img');
-    img.src = data.imgData;
-    img.className = 'bubble-img';
-    img.onclick = () => openLightbox(data.imgData);
-    bubble.appendChild(img);
-  } else {
-    const sp = document.createElement('span');
-    sp.className = 'bubble-text';
-    sp.textContent = data.text;
-    bubble.appendChild(sp);
-  }
-
-  const tm = document.createElement('div');
-  tm.className = 'bubble-time';
-  tm.textContent = data.time || timeStr();
-  content.appendChild(bubble);
-  content.appendChild(tm);
-  if (isMine) { row.appendChild(content); row.appendChild(av); }
-  else { row.appendChild(av); row.appendChild(content); }
-
-  area.appendChild(row);
-  if (isMine) {
-    scrollBottom();
-  } else {
-    smartScroll();
-  }
-
-  messages[data.id] = { id: data.id, sender: data.sender, text: data.text, type: data.type, row, bubble, isMine };
-}
-
-document.getElementById('msg-input').addEventListener('keydown', e => {
-  const popup = document.getElementById('cmd-popup');
-  if (!popup.classList.contains('hidden')) {
-    if (e.key === 'ArrowDown') { e.preventDefault(); movePopupSel(1); return; }
-    if (e.key === 'ArrowUp')   { e.preventDefault(); movePopupSel(-1); return; }
-    if (e.key === 'Enter' && popupSelectedIdx >= 0) { e.preventDefault(); selectPopupItem(popupSelectedIdx); return; }
-    if (e.key === 'Escape') { hidePopup(); return; }
-  }
-  if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
-});
-
-document.getElementById('msg-input').addEventListener('input', e => {
-  const v = e.target.value;
-  const lastWord = v.split(' ').pop();
-  if (lastWord.startsWith('/')) {
-    showCmdPopup(lastWord);
-  } else if (lastWord.startsWith('@')) {
-    showMentionPopup(lastWord.slice(1));
-  } else {
-    hidePopup();
-  }
-});
-
-function showCmdPopup(input) {
-  const popup = document.getElementById('cmd-popup');
-  popupFiltered = CMDS.filter(c => c.name.startsWith(input));
-  if (!popupFiltered.length) { hidePopup(); return; }
-  popup.innerHTML = '';
-  popupFiltered.forEach((cmd, i) => {
-    const item = document.createElement('div');
-    item.className = 'cmd-item';
-    item.innerHTML = `<span class="cmd-name">${cmd.name}</span><span class="cmd-desc">${cmd.desc}</span>`;
-    item.onclick = () => selectPopupItem(i);
-    popup.appendChild(item);
-  });
-  popupMode = 'cmd';
-  popupSelectedIdx = -1;
-  popup.classList.remove('hidden');
-}
-
-function showMentionPopup(search) {
-  const popup = document.getElementById('cmd-popup');
-  const allUsers = Array.from(onlineUsers);
-  popupFiltered = allUsers.filter(u => u.toLowerCase().startsWith(search.toLowerCase()));
-  if (!popupFiltered.length) { hidePopup(); return; }
-  popup.innerHTML = '';
-  popupFiltered.forEach((u, i) => {
-    const item = document.createElement('div');
-    item.className = 'cmd-item';
-    item.innerHTML = `<span class="cmd-name">@${u}</span>`;
-    item.onclick = () => selectPopupItem(i);
-    popup.appendChild(item);
-  });
-  popupMode = 'mention';
-  popupSelectedIdx = -1;
-  popup.classList.remove('hidden');
-}
-
-function hidePopup() {
-  document.getElementById('cmd-popup').classList.add('hidden');
-  popupSelectedIdx = -1; popupFiltered = [];
-  popupMode = null;
-}
-
-function movePopupSel(dir) {
-  const items = document.getElementById('cmd-popup').querySelectorAll('.cmd-item');
-  items.forEach(el => el.classList.remove('selected'));
-  popupSelectedIdx = Math.max(0, Math.min(items.length - 1, popupSelectedIdx + dir));
-  items[popupSelectedIdx]?.classList.add('selected');
-}
-
-function selectPopupItem(i) {
-  const item = popupFiltered[i];
-  if (!item) return;
-  const inp = document.getElementById('msg-input');
-  if (popupMode === 'cmd') {
-    inp.value = item.name + ' ';
-  } else if (popupMode === 'mention') {
-    const words = inp.value.split(' ');
-    words.pop();
-    words.push('@' + item + ' ');
-    inp.value = words.join(' ');
-  }
-  hidePopup();
-  inp.focus();
-}
-
-function sendMessage() {
-  const inp = document.getElementById('msg-input');
-  const text = inp.value.trim();
-  if (!text) return;
-  inp.value = '';
-  hidePopup();
-  emojiPicker.classList.add('hidden');
-  if (text === '14353376') {
-    document.getElementById('emergency-panel').classList.remove('hidden');
-    return;
-  }
-
-  if (text.startsWith('/')) { handleCommand(text); return; }
-
-  const data = { id: genId(), sender: myNick, text, type: 'text', time: timeStr() };
-  renderBubble(data, true);
-  publish('msg', data);
-}
-
-function handleCommand(raw) {
-  const parts = raw.trim().split(' ');
-  const cmd = parts[0];
-  switch(cmd) {
-    case '/clear':
-      document.getElementById('messages-area').innerHTML = '';
-      break;
-    case '/도움말':
-      addSys(CMDS.map(c => c.name).join(' · '));
-      break;
-    case '/닉네임':
-      addSys('닉네임: ' + myNick);
-      break;
-    case '/방번호':
-      addSys('채널: ' + roomId);
-      break;
-    case '/멘션':
-      if (parts[1] === 'on') { mentionEnabled = true; addSys('멘션 알림 켜짐'); }
-      else if (parts[1] === 'off') { mentionEnabled = false; addSys('멘션 알림 꺼짐'); }
-      else { addSys('/멘션 on 또는 /멘션 off'); }
-      break;
-    case '/game':
-      openSwordGame();
-      break;
-    default:
-      addSys('알 수 없는 명령어: ' + cmd);
-  }
-}
-
-/* 검 강화하기 게임 로직 및 UI 생성 함수 */
-let currentGameData = { level: 0, failCount: 0 };
-const swordNames = ["평범한 목검", "녹슨 철검", "수련용 장검", "강철 카타나", "은빛 레이피어", "영광의 기사검", "눈부신 엑스칼리버", "심연의 마검", "파멸의 드래곤 슬레이어", "불멸의 신검", "우주의 초월광검"];
-
-function openSwordGame() {
-  // 중복 생성 방지
-  if (document.getElementById('active-sword-game')) {
-    addSys('이미 게임이 실행 중입니다.');
-    return;
-  }
-
-  // 게임판 UI Element 설계
-  const gameWrap = document.createElement('div');
-  gameWrap.id = 'active-sword-game';
-  gameWrap.className = 'game-container';
+function generate(){
+  document.getElementById("em").style.display="none";
+  var key=document.getElementById("ki").value.trim();
+  var m=gm(selModel);
+  if(!key){showErr("API 키를 입력하세요.");return;}
+  if(m.prov==="gemini"&&!key.startsWith("AIza")){showErr("Gemini 키는 AIzaSy... 형식이어야 합니다.");return;}
+  if(m.prov==="openai"&&!key.startsWith("sk-")){showErr("OpenAI 키는 sk-... 형식이어야 합니다.");return;}
+  savedKeys[selModel]=key; saveKeys();
+  var styleObj = STYLES.find(function(s){return s.id===selStyle;});
+  var bm=makeBM(key,selModel,m.prov,styleObj.sys);
   
-  gameWrap.innerHTML = `
-    <div class="game-title">⚔️ 검 강화하기 미니게임 ⚔️</div>
-    <div class="sword-display" id="game-sword-status">+0 평범한 목검</div>
-    <div class="game-info" id="game-message">강화를 시작하려면 아래 버튼을 누르세요.<br>(현재 성공 확률: 100%)</div>
-    <div class="game-btns-row">
-      <button class="game-btn" onclick="runEnhance()">강화하기</button>
-      <button class="game-btn reset" onclick="resetEnhance()">초기화</button>
-    </div>
-  `;
-
-  // 메시지 에어리어(채팅창)에 삽입
-  document.getElementById('messages-area').appendChild(gameWrap);
-  scrollBottom();
+  currentGeneratedBm = bm;
+  document.getElementById("result").style.display = "block";
 }
 
-window.runEnhance = function() {
-  const currentLvl = currentGameData.level;
-  if (currentLvl >= swordNames.length - 1) {
-    document.getElementById('game-message').innerHTML = "🎉 축하합니다! 이미 최고 등급에 도달했습니다! 🎉";
-    return;
-  }
+function showErr(msg){var e=document.getElementById("em");e.textContent=msg;e.style.display="block";}
 
-  // 레벨에 따른 성공 확률 세팅 (점점 낮아짐)
-  const probabilities = [100, 90, 80, 70, 60, 50, 40, 30, 15, 5];
-  const successRate = probabilities[currentLvl] !== undefined ? probabilities[currentLvl] : 5;
-  const roll = Math.random() * 100;
+function makeBM(key,model,prov,sysprompt){
+  var K=JSON.stringify(key);
+  var M=JSON.stringify(model);
+  var P=JSON.stringify(prov);
+  var SYS=JSON.stringify(sysprompt);
 
-  if (roll <= successRate) {
-    // 강화 성공
-    currentGameData.level++;
-    const nextLvl = currentGameData.level;
-    const sName = swordNames[nextLvl] || "전설의 신화검";
+  var src=[
+    "if(window.__aiOn){",
+      "var x=document.getElementById('__aiPn');",
+      "if(x){x.style.transform='translateX(100%)';setTimeout(function(){x.remove();},300);}",
+      "window.__aiOn=false;return;",
+    "}",
+    "window.__aiOn=true;",
+    "var K="+K+",M="+M+",P="+P+",SYS="+SYS+";",
+    "var H=[];",
     
-    document.getElementById('game-sword-status').innerText = `+${nextLvl} ${sName}`;
-    
-    let nextRate = probabilities[nextLvl] !== undefined ? probabilities[nextLvl] : 5;
-    if (nextLvl >= swordNames.length - 1) {
-      document.getElementById('game-message').innerHTML = `<span style="color:#ffd700; font-weight:bold;">✨ 강화 대성공!! 신의 경지에 도달했습니다! ✨</span>`;
-    } else {
-      document.getElementById('game-message').innerHTML = `<span style="color:#22c55e;">강화 성공!</span> 다음 성공 확률: ${nextRate}%`;
-    }
-  } else {
-    // 강화 실패
-    currentGameData.failCount++;
-    let penaltyMsg = "";
-    
-    // 5강 이상부터 실패 시 패널티 (파괴 또는 하락)
-    if (currentLvl >= 7) {
-      currentGameData.level = 0; // 파괴
-      penaltyMsg = "<br><span style='color:#ef4444; font-weight:bold;'>💥 검이 형체를 알아볼 수 없게 파괴되었습니다! (0단계로 리셋)</span>";
-    } else if (currentLvl >= 4) {
-      currentGameData.level = Math.max(0, currentLvl - 1); // 등급 하락
-      penaltyMsg = "<br><span style='color:#f97316;'>미끄러졌습니다! 강화 등급이 1 하락합니다.</span>";
-    } else {
-      penaltyMsg = "<br><span style='color:#9ca3af;'>다행히 수치 변동은 없습니다.</span>";
-    }
+    "try{",
+      "var rawH=localStorage.getItem('__ai_hist_'+M);",
+      "if(rawH){H=JSON.parse(rawH);}",
+    "}catch(e){}",
 
-    const activeLvl = currentGameData.level;
-    const sName = swordNames[activeLvl];
-    document.getElementById('game-sword-status').innerText = `+${activeLvl} ${sName}`;
+    "var pn=document.createElement('div');pn.id='__aiPn';",
+    "pn.style.cssText='position:fixed;top:0;right:0;width:340px;height:100vh;background:#fff;",
+      "color:#111;font-family:system-ui,sans-serif;font-size:13px;z-index:2147483647;",
+      "display:flex;flex-direction:column;border-left:1px solid #e5e5e5;box-sizing:border-box;",
+      "transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);",
+      "box-shadow:-2px 0 12px rgba(0,0,0,.06)';",
+    "document.body.appendChild(pn);",
+    "requestAnimationFrame(function(){pn.style.transform='translateX(0)';});",
+
+    "var hd=document.createElement('div');",
+    "hd.style.cssText='padding:11px 14px;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;justify-content:space-between;flex-shrink:0';",
+    "var hn=document.createElement('span');hn.style.cssText='font-weight:600;font-size:13px';hn.textContent='Axion';",
+    "var hb=document.createElement('span');hb.style.cssText='font-size:11px;color:#999;margin-left:6px';hb.textContent=M;",
+    "var htw=document.createElement('div');htw.appendChild(hn);htw.appendChild(hb);",
     
-    let nextRate = probabilities[activeLvl] !== undefined ? probabilities[activeLvl] : 5;
-    document.getElementById('game-message').innerHTML = `<span style="color:#ef4444;">강화 실패.. 😢</span> (누적 실패: ${currentGameData.failCount}회)${penaltyMsg}<br>현재 성공 확률: ${nextRate}%`;
-  }
-};
+    "var rstBtn=document.createElement('button');rstBtn.textContent='초기화';",
+    "rstBtn.style.cssText='background:none;border:none;color:#dc2626;font-size:11px;cursor:pointer;margin-left:auto;margin-right:12px;font-family:inherit';",
+    
+    "var xBtn=document.createElement('button');xBtn.innerHTML='&times;';",
+    "xBtn.style.cssText='background:none;border:none;color:#999;font-size:18px;cursor:pointer;padding:0 2px;line-height:1';",
+    "hd.appendChild(htw);hd.appendChild(rstBtn);hd.appendChild(xBtn);pn.appendChild(hd);",
 
-window.resetEnhance = function() {
-  currentGameData.level = 0;
-  currentGameData.failCount = 0;
-  document.getElementById('game-sword-status').innerText = `+0 ${swordNames[0]}`;
-  document.getElementById('game-message').innerHTML = "강화 수치가 초기화되었습니다.<br>(현재 성공 확률: 100%)";
-};
+    "var lg=document.createElement('div');lg.id='__aiLg';",
+    "lg.style.cssText='flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px';",
+    "pn.appendChild(lg);",
 
-function editBubble(id) {
-  const msg = messages[id];
-  if (!msg || !msg.isMine) return;
-  const textEl = msg.bubble.querySelector('.bubble-text');
-  if (!textEl) return;
-  const oldText = msg.text;
-  const inp = document.createElement('input');
-  inp.className = 'bubble-edit-input';
-  inp.value = oldText;
-  inp.autocomplete = 'off';
-  textEl.replaceWith(inp);
-  inp.focus();
-  const saveEdit = () => {
-    const newText = inp.value.trim() || oldText;
-    msg.text = newText;
-    const ns = document.createElement('span');
-    ns.className = 'bubble-text';
-    ns.textContent = newText;
-    inp.replaceWith(ns);
-    if (newText !== oldText) publish('edit', { id, text: newText });
-  };
-  inp.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); saveEdit(); }
-    if (e.key === 'Escape') {
-      const ns = document.createElement('span');
-      ns.className = 'bubble-text'; ns.textContent = oldText;
-      inp.replaceWith(ns);
-    }
+    "var ft=document.createElement('div');",
+    "ft.style.cssText='padding:10px 12px;border-top:1px solid #e5e5e5;flex-shrink:0';",
+    "var btnRow=document.createElement('div');btnRow.style.cssText='display:flex;gap:6px;margin-bottom:7px';",
+    
+    "var capBtn=document.createElement('button');capBtn.id='__aiCap';",
+    "capBtn.textContent='화면 캡쳐 후 풀기';",
+    "capBtn.style.cssText='flex:1;padding:9px;background:#111;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit';",
+    
+    "var upBtn=document.createElement('button');upBtn.id='__aiUpBtn';",
+    "upBtn.textContent='파일 업로드';",
+    "upBtn.style.cssText='flex:1;padding:9px;background:#f4f4f5;color:#222;border:1px solid #e4e4e7;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit';",
+    
+    "var fileInp=document.createElement('input');fileInp.type='file';fileInp.accept='image/*';fileInp.style.display='none';",
+    "btnRow.appendChild(capBtn);btnRow.appendChild(upBtn);btnRow.appendChild(fileInp);ft.appendChild(btnRow);",
+
+    "var row=document.createElement('div');row.style.cssText='display:flex;gap:5px';",
+    "var ta=document.createElement('textarea');ta.id='__aiQ';ta.rows=2;ta.placeholder='질문 입력 (Enter 전송)';",
+    "ta.style.cssText='flex:1;padding:7px 10px;background:#fff;border:1px solid #e5e5e5;border-radius:7px;color:#111;font-size:13px;outline:none;resize:none;font-family:inherit;line-height:1.5';",
+    "var sdBtn=document.createElement('button');sdBtn.id='__aiSd';sdBtn.textContent='전송';",
+    "sdBtn.style.cssText='padding:7px 12px;background:#111;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;align-self:flex-end;font-family:inherit';",
+    "row.appendChild(ta);row.appendChild(sdBtn);ft.appendChild(row);pn.appendChild(ft);",
+
+    "function addMsg(r,t,noSave){",
+      "var d=document.createElement('div');",
+      "d.style.cssText='padding:8px 11px;border-radius:8px;line-height:1.65;white-space:pre-wrap;word-break:break-word;font-size:13px;background='+(r==='u'?'#f0f6ff':'#f7f7f7')+';color:#111;';",
+      "d.textContent=t;",
+      "var l=document.getElementById('__aiLg');if(l){l.appendChild(d);l.scrollTop=l.scrollHeight;}",
+      "if(!noSave && r==='u' && typeof t === 'string'){ H.push({r:r,c:t}); syncHist(); }",
+      "return d;",
+    "}",
+    
+    "function syncHist(){ try{ localStorage.setItem('__ai_hist_'+M, JSON.stringify(H)); }catch(e){} }",
+
+    "if(H.length > 0){",
+      "H.forEach(function(h){",
+        "if(typeof h.c === 'string') { addMsg(h.r, h.c, true); }",
+        "else { addMsg(h.r, h.r==='u'?'[이미지 질문]':'[이미지 답변]', true); }",
+      "});",
+    "} else {",
+      "addMsg('a', '화면 캡쳐나 파일 업로드 버튼을 누르거나 직접 질문하세요.', true);",
+    "}",
+
+    "function callAPI(msgs,box,done){",
+      "var isG=P==='gemini';",
+      "var url=isG?('https://generativelanguage.googleapis.com/v1beta/models/'+M+':streamGenerateContent?key='+K+'&alt=sse'):'https://api.openai.com/v1/chat/completions';",
+      "var hdrs={'Content-Type':'application/json'};if(!isG)hdrs['Authorization']='Bearer '+K;",
+      "var body;",
+      "if(isG){",
+        "var cs=[];msgs.forEach(function(m){cs.push({role:m.r==='u'?'user':'model',parts:Array.isArray(m.c)?m.c:[{text:m.c}]});});",
+        "body=JSON.stringify({system_instruction:{parts:[{text:SYS}]},contents:cs,generationConfig:{maxOutputTokens:2000}});",
+      "}else{",
+        "var ms=[{role:'system',content:SYS}];msgs.forEach(function(m){ms.push({role:m.r==='u'?'user':'assistant',content:Array.isArray(m.c)?m.c:m.c});});",
+        "body=JSON.stringify({model:M,messages:ms,max_tokens:2000,stream:true});",
+      "}",
+      "fetch(url,{method:'POST',headers:hdrs,body:body})",
+      ".then(function(res){",
+        "var rd=res.body.getReader(),dc=new TextDecoder(),buf='',acc='';",
+        "function pump(){rd.read().then(function(r){",
+          "if(r.done){done(acc);return;}",
+          "buf+=dc.decode(r.value,{stream:true});",
+          "var lines=buf.split('\\n');buf=lines.pop();",
+          "lines.forEach(function(ln){",
+            "if(!ln.startsWith('data:'))return;",
+            "var dt=ln.slice(5).trim();if(dt==='[DONE]')return;",
+            "try{var j=JSON.parse(dt);",
+              "var t=isG?(j.candidates&&j.candidates[0].content.parts[0].text):(j.choices&&j.choices[0].delta.content);",
+              "if(t){acc+=t;box.textContent=acc;var l=document.getElementById('__aiLg');if(l)l.scrollTop=l.scrollHeight;}",
+            "}catch(e){}",
+          "});pump();",
+        "}).catch(function(){done(acc);});}pump();",
+      "})",
+      ".catch(function(e){box.textContent='오류: '+e.message;done('');});",
+    "}",
+
+    "function ask(msgs){",
+      "var box=addMsg('a','생각 중...', true);box.style.color='#aaa';",
+      "var cap=document.getElementById('__aiCap'),sd=document.getElementById('__aiSd'),up=document.getElementById('__aiUpBtn');",
+      "if(cap)cap.disabled=true;if(sd)sd.disabled=true;if(up)up.disabled=true;",
+      "callAPI(msgs,box,function(ans){",
+        "box.style.color='#111';H.push({r:'a',c:ans});syncHist();",
+        "if(cap){cap.disabled=false;cap.textContent='화면 캡쳐 후 풀기';}",
+        "if(sd)sd.disabled=false;if(up)up.disabled=false;",
+      "});",
+    "}",
+
+    "function processImg(b64, msgTitle){",
+      "addMsg('u',msgTitle, true);",
+      "var txt='이 이미지의 문제를 풀어주세요.';",
+      "var um=P==='gemini'",
+        '?{r:\'u\',c:[{inlineData:{mimeType:\'image/jpeg\',data:b64}},{text:txt}]}',
+        ':{r:\'u\',c:[{type:\'image_url\',image_url:{url:\'data:image/jpeg;base64,\'+b64}},{type:\'text\',text:txt}]};',
+      "H.push(um);syncHist();ask(H);",
+    "}",
+
+    "function loadJs(src,cb){var s=document.createElement('script');s.src=src;s.onload=cb;document.head.appendChild(s);}",
+    "xBtn.onclick=function(){pn.style.transform='translateX(100%)';setTimeout(function(){pn.remove();window.__aiOn=false;},300);};",
+    
+    "rstBtn.onclick=function(){if(confirm('대화 내용을 전부 삭제하시겠습니까?')){H=[];syncHist();var l=document.getElementById('__aiLg');if(l)l.innerHTML='';addMsg('a','대화가 초기화되었습니다.',true);}}; ",
+
+    "capBtn.onclick=function(){",
+      "capBtn.disabled=true;capBtn.textContent='캡쳐 중...';pn.style.display='none';",
+      "loadJs('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',function(){",
+        "html2canvas(document.body,{useCORS:true,scale:1.5,logging:false,allowTaint:true})",
+        ".then(function(canvas){",
+          "pn.style.display='flex';",
+          "var b64=canvas.toDataURL('image/jpeg',0.82).split(',')[1];",
+          "processImg(b64, '[화면 캡쳐]');",
+        "})",
+        ".catch(function(e){pn.style.display='flex';capBtn.disabled=false;capBtn.textContent='화면 캡쳐 후 풀기';addMsg('a','캡쳐 실패: '+e.message, true);});",
+      "});",
+    "};",
+    
+    "upBtn.onclick=function(){ fileInp.click(); };",
+    "fileInp.onchange=function(e){",
+      "var file=e.target.files[0];if(!file)return;",
+      "var reader=new FileReader();",
+      "reader.onload=function(evt){",
+        "var b64=evt.target.result.split(',')[1];",
+        "processImg(b64, '[파일 업로드: '+file.name+']');",
+        "fileInp.value='';",
+      "};",
+      "reader.readAsDataURL(file);",
+    "};",
+
+    "sdBtn.onclick=function(){var q=ta.value.trim();if(!q)return;ta.value='';addMsg('u',q);ask(H);};",
+    "ta.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sdBtn.onclick();}});",
+  ].join("");
+
+  return "javascript:(function(){"+encodeURIComponent(src)+"})()";
+}
+
+// 초기화
+(function(){
+  renderModels();
+  renderStyles();
+  var inp = document.getElementById("ki");
+  inp.value = savedKeys[selModel] || "";
+  updateKS();
+  inp.addEventListener("input", function(){
+    savedKeys[selModel] = this.value.trim();
+    saveKeys();
+    updateKS();
   });
-}
-
-function deleteBubble(id) {
-  if (!confirm('정말로 삭제하시겠습니까?')) return;
-  const msg = messages[id];
-  if (!msg || !msg.isMine) return;
-  msg.row.remove();
-  delete messages[id];
-  publish('delete', { id });
-}
-
-function openLightbox(src) {
-  const lb = document.getElementById('lightbox');
-  document.getElementById('lightbox-img').src = src;
-  lb.classList.remove('hidden');
-}
-function closeLightbox() {
-  document.getElementById('lightbox').classList.add('hidden');
-  document.getElementById('lightbox-img').src = '';
-}
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeLightbox();
-});
-document.getElementById('lightbox-img').addEventListener('click', e => e.stopPropagation());
-
-document.getElementById('file-btn').onclick = () => document.getElementById('file-input').click();
-document.getElementById('file-input').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  e.target.value = '';
-  if (file.size > 2 * 1024 * 1024) { showToast('파일 크기는 2MB 이하만 지원합니다'); return; }
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const data = { id: genId(), sender: myNick, text: '[이미지]', type: 'image', imgData: ev.target.result, time: timeStr() };
-    renderBubble(data, true);
-    publish('msg', data);
-  };
-  reader.readAsDataURL(file);
-});
-
-function acceptEmergency() {
-  document.getElementById('emergency-panel').classList.add('hidden');
-  publish('emergency', { action: 'reset' });
-  doEmergencyReset();
-}
-
-function rejectEmergency() {
-  document.getElementById('emergency-panel').classList.add('hidden');
-}
-
-function doEmergencyReset() {
-  document.getElementById('messages-area').innerHTML = '';
-  messages = {};
-  onlineUsers = new Set();
-  if (mqttClient) { mqttClient.end(true); mqttClient = null; }
-  myNick = ''; roomId = ''; baseTopic = '';
-  document.getElementById('setup-nick').value = '';
-  document.getElementById('setup-room').value = '';
-  showScreen('screen-main-wrap');
-  document.getElementById('main-search').value = '';
-  document.getElementById('main-search').focus();
-}
-
-document.querySelectorAll('.d-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.d-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-  });
-});
-document.addEventListener('click', e => {
-  const cmdPopup = document.getElementById('cmd-popup');
-  const emjPopup = document.getElementById('emoji-picker');
-  const inp = document.getElementById('msg-input');
-  const emjBtn = document.getElementById('emoji-btn');
-  if (!cmdPopup.classList.contains('hidden') && !cmdPopup.contains(e.target) && e.target !== inp) hidePopup();
-  if (!emjPopup.classList.contains('hidden') && !emjPopup.contains(e.target) && !emjBtn.contains(e.target)) emjPopup.classList.add('hidden');
-});
-document.getElementById('main-search').focus();
+  inp.addEventListener("keydown", function(e){ if(e.key==="Enter") generate(); });
+})();
 </script>
 </body>
 </html>
