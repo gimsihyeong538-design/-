@@ -71,6 +71,7 @@
             padding: 12px;
             border: 8px dashed #ffff00;
             text-shadow: 3px 3px #000;
+            cursor: pointer;
         }
 
         .container {
@@ -117,6 +118,8 @@
             animation: pulseBtn 0.25s infinite alternate;
             text-shadow: 4px 4px 0px #000, -3px -3px 0px #000;
             letter-spacing: 2px;
+            position: relative;
+            z-index: 20;
         }
 
         @keyframes pulseBtn {
@@ -180,6 +183,7 @@
             font-family: "Courier New", monospace;
             font-weight: bold;
             text-shadow: 0 0 10px #ff0000;
+            cursor: pointer;
         }
 
         .sticky-bar {
@@ -210,6 +214,7 @@
             background: #ff00ff;
             color: #000;
             text-align: center;
+            position: relative;
         }
 
         .sihyung-btn {
@@ -238,6 +243,7 @@
             transform: rotate(-6deg);
             margin: 4px;
             font-weight: bold;
+            cursor: pointer;
         }
 
         #ohhh-overlay {
@@ -300,33 +306,51 @@
             letter-spacing: 15px;
             animation: zoomPulse 0.15s infinite alternate;
         }
+
+        .misclick-trap {
+            cursor: pointer;
+        }
+
+        .fake-close {
+            display: inline-block;
+            background: #ff0000;
+            color: white;
+            font-weight: bold;
+            padding: 2px 6px;
+            border: 1px solid #000;
+            font-size: 12px;
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
-<body>
+<body onclick="handleGlobalClick(event)">
 
-    <button class="sihyung-btn" id="sihyungMemeBtn">🔥 김시형이 만듬 ㅋ 🔥</button>
+    <button class="sihyung-btn" id="sihyungMemeBtn" onclick="event.stopPropagation(); triggerSihyungMeme();">🔥 김시형이 만듬 ㅋ 🔥</button>
 
-    <div id="ohhh-overlay" onclick="hideOhhhOverlay()">
+    <div id="ohhh-overlay" onclick="event.stopPropagation(); hideOhhhOverlay();">
         <div class="ohhh-text-top">😲 OOOOOOHHHHHHHH!!!! 🔥</div>
         <div class="sihyung-center-face">😎 김시형 😎</div>
         <div class="crowd-emojis">🙌😲💥📢😱🤯🎉🔥</div>
     </div>
 
-    <div class="marquee-box">
+    <div class="marquee-box misclick-trap" onclick="redirectToImg(event)">
         <marquee behavior="scroll" direction="left" scrollamount="30">
             🚨 [긴급특보] 사용자님은 100만 번째 행운의 당첨자로 선정되셨습니다! 💸 지금 즉시 아래 [바로가기] 버튼을 누르지 않으면 혜택이 소멸됩니다! 💥 99.9% 초특가 할인 쿠폰 즉시 발급 중! 당장 [클릭!] 🚨
         </marquee>
     </div>
 
-    <div class="container">
+    <div class="container misclick-trap" onclick="redirectToImg(event)">
         <div class="starburst" style="top:-50px; left:-50px;"></div>
         <div class="starburst" style="bottom:-50px; right:-50px;"></div>
 
         <div style="text-align: center;">
-            <span class="badge-tag flash-fast">💥 실시간 수령 가능</span>
-            <span class="badge-tag flash-fast" style="background:#0000ff;">⚡ 단 5초 남음!</span>
-            <span class="badge-tag flash-fast" style="background:#008000;">🎉 100% 당첨 보상</span>
-            <span class="badge-tag flash-fast" style="background:#ff00ff;">🔥 특가 세일</span>
+            <span class="badge-tag flash-fast" onclick="redirectToImg(event)">💥 실시간 수령 가능</span>
+            <span class="badge-tag flash-fast" style="background:#0000ff;" onclick="redirectToImg(event)">⚡ 단 5초 남음!</span>
+            <span class="badge-tag flash-fast" style="background:#008000;" onclick="redirectToImg(event)">🎉 100% 당첨 보상</span>
+            <span class="badge-tag flash-fast" style="background:#ff00ff;" onclick="redirectToImg(event)">🔥 특가 세일</span>
 
             <h1 class="rainbow-text" style="font-size: 52px; margin: 15px 0;">
                 🎉 축하합니다! 🎉<br>
@@ -339,10 +363,10 @@
 
             <div style="margin: 20px 0;">
                 <p style="color: #ffffff; font-size: 20px; margin-bottom: 5px; font-weight: bold;">⚠️ 혜택 만료까지 남은 시간 ⚠️</p>
-                <div class="timer-box" id="timer">00 : 05 . 00</div>
+                <div class="timer-box" id="timer" onclick="redirectToImg(event)">00 : 05 . 00</div>
             </div>
 
-            <a href="https://eachvideo.com" target="_blank" class="mega-goto-btn flash-fast">
+            <a href="https://eachvideo.com" target="_blank" onclick="event.stopPropagation();" class="mega-goto-btn flash-fast">
                 🔥 [바로가기] 혜택 즉시 수령하기 🔥<br>
                 <span style="font-size: 26px; text-decoration: underline;">👉 당장 클릭하여 접속 👈</span>
             </a>
@@ -351,32 +375,35 @@
         </div>
 
         <div class="grid-ads">
-            <div class="ad-card" style="background: #ffff00;">
+            <div class="ad-card" style="background: #ffff00;" onclick="redirectToImg(event)">
+                <span class="fake-close" onclick="redirectToImg(event)">X</span>
                 <h3 class="blink-text" style="color: #ff0000; font-size: 28px;">💰 로또 1등 번호 유출?</h3>
                 <p style="font-weight: bold; margin: 10px 0; font-size: 17px;">이번 주 예상 당첨 번호 무료 공개! 지금 즉시 확인하세요.</p>
-                <a href="https://eachvideo.com" target="_blank" style="background: #000; color: #fff; padding: 12px; display: inline-block; font-weight: bold; text-decoration: none; border: 4px ridge #ff0000; font-size: 20px;">
+                <a href="https://eachvideo.com" target="_blank" onclick="event.stopPropagation();" style="background: #000; color: #fff; padding: 12px; display: inline-block; font-weight: bold; text-decoration: none; border: 4px ridge #ff0000; font-size: 20px;">
                     👉 번호 확인 바로가기
                 </a>
             </div>
 
-            <div class="ad-card" style="background: #00ffff;">
+            <div class="ad-card" style="background: #00ffff;" onclick="redirectToImg(event)">
+                <span class="fake-close" onclick="redirectToImg(event)">X</span>
                 <h3 class="flash-fast" style="font-size: 28px;">⚡ 99% 파격 초특가!</h3>
                 <p style="font-weight: bold; margin: 10px 0; font-size: 17px;">선착순 10명 한정 수량! 지금 클릭 안 하면 평생 후회!</p>
-                <a href="https://eachvideo.com" target="_blank" style="background: #ff0000; color: #fff; padding: 12px; display: inline-block; font-weight: bold; text-decoration: none; border: 4px ridge #ffff00; font-size: 20px;">
+                <a href="https://eachvideo.com" target="_blank" onclick="event.stopPropagation();" style="background: #ff0000; color: #fff; padding: 12px; display: inline-block; font-weight: bold; text-decoration: none; border: 4px ridge #ffff00; font-size: 20px;">
                     💥 할인쿠폰 받기 바로가기
                 </a>
             </div>
 
-            <div class="ad-card" style="background: #00ff00;">
+            <div class="ad-card" style="background: #00ff00;" onclick="redirectToImg(event)">
+                <span class="fake-close" onclick="redirectToImg(event)">X</span>
                 <h3 style="font-size: 28px;" class="blink-text">🔞 [긴급] 충격 영상</h3>
                 <p style="font-weight: bold; margin: 10px 0; font-size: 17px;">인터넷을 뜨겁게 달군 그 사건! 10초 후 삭제됩니다.</p>
-                <a href="https://eachvideo.com" target="_blank" style="background: #0000ff; color: #fff; padding: 12px; display: inline-block; font-weight: bold; text-decoration: none; border: 4px ridge #ffffff; font-size: 20px;">
+                <a href="https://eachvideo.com" target="_blank" onclick="event.stopPropagation();" style="background: #0000ff; color: #fff; padding: 12px; display: inline-block; font-weight: bold; text-decoration: none; border: 4px ridge #ffffff; font-size: 20px;">
                     ▶️ 영상 재생 바로가기
                 </a>
             </div>
         </div>
 
-        <div style="margin-top: 25px; border-top: 4px dashed #fff; padding-top: 15px; color: #fff; text-align: left; font-size: 16px;">
+        <div style="margin-top: 25px; border-top: 4px dashed #fff; padding-top: 15px; color: #fff; text-align: left; font-size: 16px;" onclick="redirectToImg(event)">
             <p style="color: #ffff00; font-weight: bold; font-size: 18px;">💬 실시간 당첨자 후기:</p>
             <marquee behavior="slide" direction="up" scrollamount="3" style="height: 70px; background: #111; padding: 10px; border: 2px solid #999;">
                 <p>김*철: "진짜로 바로가기 눌렀더니 보상 받았네요 ㅋㅋㅋ 대박입니다!"</p>
@@ -386,7 +413,7 @@
         </div>
     </div>
 
-    <div class="marquee-box" style="border-color: #00ffff; background: #ff00ff; margin-top: 20px;">
+    <div class="marquee-box misclick-trap" style="border-color: #00ffff; background: #ff00ff; margin-top: 20px;" onclick="redirectToImg(event)">
         <marquee behavior="scroll" direction="right" scrollamount="25">
             🎁 [클릭!] 바로가기! [클릭!] 🔥 당장 접속! 🔥 당신을 위한 특별 보상! 지금 [바로가기] 버튼을 누르고 혜택 받아가세요! 🎁
         </marquee>
@@ -395,12 +422,12 @@
     <div class="popup" id="popup1">
         <div class="popup-header">
             <span>⚠️ 경고! (1)개의 긴급 메시지</span>
-            <div class="popup-close" onclick="closeOrMultiply(this)">X</div>
+            <div class="popup-close" onclick="redirectToImg(event)">X</div>
         </div>
         <div class="popup-body">
             <p style="color: red; font-weight: bold; font-size: 18px;">바이러스 위험 감지!</p>
             <p style="margin: 8px 0; font-size: 14px;">지금 치료를 진행하지 않으면 시스템이 마비됩니다.</p>
-            <a href="https://eachvideo.com" target="_blank" id="runawayBtn" style="display:inline-block; background:blue; color:white; padding:10px 18px; text-decoration:none; font-weight:bold; border:2px solid yellow; font-size: 17px;">
+            <a href="https://eachvideo.com" target="_blank" id="runawayBtn" onclick="event.stopPropagation();" style="display:inline-block; background:blue; color:white; padding:10px 18px; text-decoration:none; font-weight:bold; border:2px solid yellow; font-size: 17px;">
                 🛡️ 즉시 치료 바로가기
             </a>
         </div>
@@ -409,26 +436,38 @@
     <div class="popup" id="popup2">
         <div class="popup-header" style="background: linear-gradient(90deg, #800080, #ff00ff);">
             <span>🎉 축하 메시지 도착!</span>
-            <div class="popup-close" onclick="closeOrMultiply(this)">X</div>
+            <div class="popup-close" onclick="redirectToImg(event)">X</div>
         </div>
         <div class="popup-body" style="background: #ffffcc;">
             <p style="font-weight: bold; color: #d00; font-size: 17px;">[단독] 100만 캐시 무료 증정</p>
             <p style="font-size: 14px; margin: 6px 0;">아래 [바로가기] 버튼을 눌러 수령하세요.</p>
-            <a href="https://eachvideo.com" target="_blank" style="background: green; color: yellow; padding: 10px 18px; display: inline-block; text-decoration: none; font-weight: bold; font-size: 17px;">
+            <a href="https://eachvideo.com" target="_blank" onclick="event.stopPropagation();" style="background: green; color: yellow; padding: 10px 18px; display: inline-block; text-decoration: none; font-weight: bold; font-size: 17px;">
                 💰 100만 캐시 받기 바로가기
             </a>
         </div>
     </div>
 
-    <div class="sticky-bar">
+    <div class="sticky-bar misclick-trap" onclick="redirectToImg(event)">
         <span class="flash-fast" style="font-size: 24px; font-weight: bold; padding: 5px 12px;">🚨 창을 닫지 마세요!</span>
         <span style="color: #000; font-weight: bold; font-size: 20px;">접속자 폭주 중! 마감 임박!</span>
-        <a href="https://eachvideo.com" target="_blank" style="background: #ff0000; color: #ffff00; padding: 12px 30px; font-size: 26px; font-weight: 900; text-decoration: none; border: 5px ridge #000; border-radius: 12px;" class="blink-text">
+        <a href="https://eachvideo.com" target="_blank" onclick="event.stopPropagation();" style="background: #ff0000; color: #ffff00; padding: 12px 30px; font-size: 26px; font-weight: 900; text-decoration: none; border: 5px ridge #000; border-radius: 12px;" class="blink-text">
             ⚡ [바로가기] 클릭 ⚡
         </a>
     </div>
 
     <script>
+        function redirectToImg(e) {
+            if (e) e.stopPropagation();
+            window.open('https://ibb.co/5XYPKKH1', '_blank');
+        }
+
+        function handleGlobalClick(e) {
+            const validBtn = e.target.closest('a[href], #sihyungMemeBtn, #ohhh-overlay');
+            if (!validBtn) {
+                redirectToImg(e);
+            }
+        }
+
         let time = 5.00;
         const timerElem = document.getElementById('timer');
 
@@ -450,19 +489,6 @@
             popup.style.top = `${Math.max(10, newTop)}px`;
             popup.style.left = `${Math.max(10, newLeft)}px`;
         });
-
-        function closeOrMultiply(closeBtn) {
-            const parentPopup = closeBtn.closest('.popup');
-            const clone = parentPopup.cloneNode(true);
-            const randomX = Math.random() * (window.innerWidth - 350);
-            const randomY = Math.random() * (window.innerHeight - 200);
-            
-            clone.style.top = `${Math.max(20, randomY)}px`;
-            clone.style.left = `${Math.max(20, randomX)}px`;
-            
-            document.body.appendChild(clone);
-            parentPopup.style.top = `${Math.random() * 300}px`;
-        }
 
         let audioCtx = null;
         let memeTimeout = null;
@@ -522,8 +548,6 @@
             const overlay = document.getElementById('ohhh-overlay');
             overlay.style.display = 'none';
         }
-
-        document.getElementById('sihyungMemeBtn').addEventListener('click', triggerSihyungMeme);
     </script>
 </body>
 </html>
